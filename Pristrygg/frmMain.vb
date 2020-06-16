@@ -1050,8 +1050,8 @@ EH:
 
 
     Private Sub mnuAddLeverantor_Click()
-   Set cLev = New clsSupplier
-   If Not cLev.CreatePosts Then Exit Sub
+        cLev = New clsSupplier
+        If Not cLev.CreatePosts Then Exit Sub
         frmLeverantor.Tag = "NEWLEV"
         frmLeverantor.Show
         Me.Hide()
@@ -1086,7 +1086,7 @@ EH:
 
 
     Private Sub mnuHelptext_Click()
-        frmAllHelp.Show
+        'frmAllHelp.Show
     End Sub
 
     Private Sub mnuVerifyTryggFile_Click()
