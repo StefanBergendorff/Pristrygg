@@ -48,29 +48,25 @@ Partial Class frmMain
         Me.Office2013LightTheme1 = New Telerik.WinControls.Themes.Office2013LightTheme()
         Me.Windows8Theme1 = New Telerik.WinControls.Themes.Windows8Theme()
         Me.lstLev = New Telerik.WinControls.UI.RadListControl()
-        Me.RadProgressBar1 = New Telerik.WinControls.UI.RadProgressBar()
         Me.chkVerifiering = New Telerik.WinControls.UI.RadCheckBox()
         Me.cmdTransfer = New Telerik.WinControls.UI.RadButton()
         Me.lstFiles = New Telerik.WinControls.UI.RadListControl()
-        Me.toggleVerifiering = New Telerik.WinControls.UI.RadToggleSwitch()
         Me.statusStrip = New Telerik.WinControls.UI.RadStatusStrip()
-        Me.labelText = New Telerik.WinControls.UI.RadLabelElement()
-        Me.labelProgressBar = New Telerik.WinControls.UI.RadProgressBarElement()
-        Me.labelClock = New Telerik.WinControls.UI.RadLabelElement()
-        Me.labelTime = New Telerik.WinControls.UI.RadLabelElement()
+        Me.txtProgressBar = New Telerik.WinControls.UI.RadLabelElement()
         Me.CommandBarSeparator1 = New Telerik.WinControls.UI.CommandBarSeparator()
+        Me.progressBarElement = New Telerik.WinControls.UI.RadProgressBarElement()
         Me.CommandBarSeparator2 = New Telerik.WinControls.UI.CommandBarSeparator()
+        Me.labelStatus = New Telerik.WinControls.UI.RadLabelElement()
         Me.CommandBarSeparator3 = New Telerik.WinControls.UI.CommandBarSeparator()
+        Me.labelDateTime = New Telerik.WinControls.UI.RadLabelElement()
         Me.FrameLevfiler = New Telerik.WinControls.UI.RadGroupBox()
         Me.frameLev = New Telerik.WinControls.UI.RadGroupBox()
         Me.frameCmd = New Telerik.WinControls.UI.RadGroupBox()
         CType(Me.RadMenu1, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.lstLev, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.RadProgressBar1, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.chkVerifiering, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.cmdTransfer, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.lstFiles, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.toggleVerifiering, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.statusStrip, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.FrameLevfiler, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.FrameLevfiler.SuspendLayout()
@@ -152,20 +148,12 @@ Partial Class frmMain
         '
         Me.lstLev.Location = New System.Drawing.Point(15, 21)
         Me.lstLev.Name = "lstLev"
-        Me.lstLev.Size = New System.Drawing.Size(261, 102)
+        Me.lstLev.Size = New System.Drawing.Size(371, 137)
         Me.lstLev.TabIndex = 1
-        '
-        'RadProgressBar1
-        '
-        Me.RadProgressBar1.Location = New System.Drawing.Point(0, 441)
-        Me.RadProgressBar1.Name = "RadProgressBar1"
-        Me.RadProgressBar1.Size = New System.Drawing.Size(671, 24)
-        Me.RadProgressBar1.TabIndex = 2
-        Me.RadProgressBar1.Text = "RadProgressBar1"
         '
         'chkVerifiering
         '
-        Me.chkVerifiering.Location = New System.Drawing.Point(5, 69)
+        Me.chkVerifiering.Location = New System.Drawing.Point(5, 49)
         Me.chkVerifiering.Name = "chkVerifiering"
         Me.chkVerifiering.Size = New System.Drawing.Size(107, 18)
         Me.chkVerifiering.TabIndex = 3
@@ -181,97 +169,88 @@ Partial Class frmMain
         '
         'lstFiles
         '
-        Me.lstFiles.Location = New System.Drawing.Point(22, 33)
+        Me.lstFiles.Location = New System.Drawing.Point(15, 21)
         Me.lstFiles.Name = "lstFiles"
-        Me.lstFiles.Size = New System.Drawing.Size(285, 130)
+        Me.lstFiles.Size = New System.Drawing.Size(421, 225)
         Me.lstFiles.TabIndex = 5
-        '
-        'toggleVerifiering
-        '
-        Me.toggleVerifiering.Location = New System.Drawing.Point(5, 113)
-        Me.toggleVerifiering.Name = "toggleVerifiering"
-        Me.toggleVerifiering.OffText = "Nej"
-        Me.toggleVerifiering.OnText = "Ja"
-        Me.toggleVerifiering.Size = New System.Drawing.Size(50, 20)
-        Me.toggleVerifiering.TabIndex = 6
         '
         'statusStrip
         '
-        Me.statusStrip.Items.AddRange(New Telerik.WinControls.RadItem() {Me.labelText, Me.CommandBarSeparator1, Me.labelProgressBar, Me.CommandBarSeparator2, Me.labelClock, Me.CommandBarSeparator3, Me.labelTime})
+        Me.statusStrip.Items.AddRange(New Telerik.WinControls.RadItem() {Me.txtProgressBar, Me.CommandBarSeparator1, Me.progressBarElement, Me.CommandBarSeparator2, Me.labelStatus, Me.CommandBarSeparator3, Me.labelDateTime})
         Me.statusStrip.Location = New System.Drawing.Point(0, 471)
         Me.statusStrip.Name = "statusStrip"
         Me.statusStrip.Size = New System.Drawing.Size(671, 30)
         Me.statusStrip.TabIndex = 7
         '
-        'labelText
+        'txtProgressBar
         '
-        Me.labelText.Name = "labelText"
-        Me.statusStrip.SetSpring(Me.labelText, False)
-        Me.labelText.Text = "text"
-        Me.labelText.TextWrap = True
-        '
-        'labelProgressBar
-        '
-        Me.labelProgressBar.AutoSize = True
-        Me.labelProgressBar.DefaultSize = New System.Drawing.Size(300, 20)
-        Me.labelProgressBar.Name = "labelProgressBar"
-        Me.labelProgressBar.SeparatorColor1 = System.Drawing.Color.White
-        Me.labelProgressBar.SeparatorColor2 = System.Drawing.Color.White
-        Me.labelProgressBar.SeparatorColor3 = System.Drawing.Color.White
-        Me.labelProgressBar.SeparatorColor4 = System.Drawing.Color.White
-        Me.labelProgressBar.SeparatorGradientAngle = 0
-        Me.labelProgressBar.SeparatorGradientPercentage1 = 0.4!
-        Me.labelProgressBar.SeparatorGradientPercentage2 = 0.6!
-        Me.labelProgressBar.SeparatorNumberOfColors = 2
-        Me.labelProgressBar.ShowProgressIndicators = True
-        Me.statusStrip.SetSpring(Me.labelProgressBar, False)
-        Me.labelProgressBar.StepWidth = 14
-        Me.labelProgressBar.SweepAngle = 90
-        Me.labelProgressBar.Text = "0 %"
-        '
-        'labelClock
-        '
-        Me.labelClock.Name = "labelClock"
-        Me.statusStrip.SetSpring(Me.labelClock, False)
-        Me.labelClock.Text = "RadLabelElement1"
-        Me.labelClock.TextWrap = True
-        '
-        'labelTime
-        '
-        Me.labelTime.Name = "labelTime"
-        Me.statusStrip.SetSpring(Me.labelTime, False)
-        Me.labelTime.Text = "RadLabelElement1"
-        Me.labelTime.TextWrap = True
+        Me.txtProgressBar.Name = "txtProgressBar"
+        Me.statusStrip.SetSpring(Me.txtProgressBar, False)
+        Me.txtProgressBar.Text = "1/1"
+        Me.txtProgressBar.TextWrap = True
         '
         'CommandBarSeparator1
         '
         Me.CommandBarSeparator1.Name = "CommandBarSeparator1"
         Me.statusStrip.SetSpring(Me.CommandBarSeparator1, False)
-        Me.CommandBarSeparator1.Text = ""
         Me.CommandBarSeparator1.VisibleInOverflowMenu = False
+        '
+        'progressBarElement
+        '
+        Me.progressBarElement.AutoSize = True
+        Me.progressBarElement.DefaultSize = New System.Drawing.Size(300, 20)
+        Me.progressBarElement.Name = "progressBarElement"
+        Me.progressBarElement.SeparatorColor1 = System.Drawing.Color.White
+        Me.progressBarElement.SeparatorColor2 = System.Drawing.Color.White
+        Me.progressBarElement.SeparatorColor3 = System.Drawing.Color.White
+        Me.progressBarElement.SeparatorColor4 = System.Drawing.Color.White
+        Me.progressBarElement.SeparatorGradientAngle = 0
+        Me.progressBarElement.SeparatorGradientPercentage1 = 0.4!
+        Me.progressBarElement.SeparatorGradientPercentage2 = 0.6!
+        Me.progressBarElement.SeparatorNumberOfColors = 2
+        Me.progressBarElement.ShowProgressIndicators = True
+        Me.statusStrip.SetSpring(Me.progressBarElement, False)
+        Me.progressBarElement.StepWidth = 14
+        Me.progressBarElement.SweepAngle = 90
+        Me.progressBarElement.Text = "0 %"
         '
         'CommandBarSeparator2
         '
         Me.CommandBarSeparator2.Name = "CommandBarSeparator2"
         Me.statusStrip.SetSpring(Me.CommandBarSeparator2, False)
-        Me.CommandBarSeparator2.Text = ""
         Me.CommandBarSeparator2.VisibleInOverflowMenu = False
+        '
+        'labelStatus
+        '
+        Me.labelStatus.AutoSizeMode = Telerik.WinControls.RadAutoSizeMode.FitToAvailableSize
+        Me.labelStatus.Name = "labelStatus"
+        Me.statusStrip.SetSpring(Me.labelStatus, False)
+        Me.labelStatus.Text = "RadLabelElement1"
+        Me.labelStatus.TextWrap = True
         '
         'CommandBarSeparator3
         '
         Me.CommandBarSeparator3.Name = "CommandBarSeparator3"
         Me.statusStrip.SetSpring(Me.CommandBarSeparator3, False)
-        Me.CommandBarSeparator3.Text = ""
         Me.CommandBarSeparator3.VisibleInOverflowMenu = False
+        '
+        'labelDateTime
+        '
+        Me.labelDateTime.AutoSizeMode = Telerik.WinControls.RadAutoSizeMode.FitToAvailableSize
+        Me.labelDateTime.Name = "labelDateTime"
+        Me.statusStrip.SetSpring(Me.labelDateTime, False)
+        Me.labelDateTime.Text = "RadLabelElement1"
+        Me.labelDateTime.TextWrap = True
         '
         'FrameLevfiler
         '
         Me.FrameLevfiler.AccessibleRole = System.Windows.Forms.AccessibleRole.Grouping
+        Me.FrameLevfiler.Anchor = System.Windows.Forms.AnchorStyles.Left
         Me.FrameLevfiler.Controls.Add(Me.lstFiles)
         Me.FrameLevfiler.HeaderText = "Leverantörsfiler"
-        Me.FrameLevfiler.Location = New System.Drawing.Point(158, 205)
+        Me.FrameLevfiler.Location = New System.Drawing.Point(158, 200)
         Me.FrameLevfiler.Name = "FrameLevfiler"
-        Me.FrameLevfiler.Size = New System.Drawing.Size(322, 179)
+        Me.FrameLevfiler.Size = New System.Drawing.Size(489, 260)
         Me.FrameLevfiler.TabIndex = 0
         Me.FrameLevfiler.Text = "Leverantörsfiler"
         '
@@ -280,9 +259,9 @@ Partial Class frmMain
         Me.frameLev.AccessibleRole = System.Windows.Forms.AccessibleRole.Grouping
         Me.frameLev.Controls.Add(Me.lstLev)
         Me.frameLev.HeaderText = "Upplagda leverantörer"
-        Me.frameLev.Location = New System.Drawing.Point(158, 36)
+        Me.frameLev.Location = New System.Drawing.Point(158, 19)
         Me.frameLev.Name = "frameLev"
-        Me.frameLev.Size = New System.Drawing.Size(285, 145)
+        Me.frameLev.Size = New System.Drawing.Size(489, 173)
         Me.frameLev.TabIndex = 8
         Me.frameLev.Text = "Upplagda leverantörer"
         '
@@ -291,11 +270,10 @@ Partial Class frmMain
         Me.frameCmd.AccessibleRole = System.Windows.Forms.AccessibleRole.Grouping
         Me.frameCmd.Controls.Add(Me.cmdTransfer)
         Me.frameCmd.Controls.Add(Me.chkVerifiering)
-        Me.frameCmd.Controls.Add(Me.toggleVerifiering)
         Me.frameCmd.HeaderText = ""
         Me.frameCmd.Location = New System.Drawing.Point(12, 26)
         Me.frameCmd.Name = "frameCmd"
-        Me.frameCmd.Size = New System.Drawing.Size(128, 358)
+        Me.frameCmd.Size = New System.Drawing.Size(128, 439)
         Me.frameCmd.TabIndex = 9
         '
         'frmMain
@@ -308,7 +286,6 @@ Partial Class frmMain
         Me.Controls.Add(Me.frameLev)
         Me.Controls.Add(Me.FrameLevfiler)
         Me.Controls.Add(Me.statusStrip)
-        Me.Controls.Add(Me.RadProgressBar1)
         Me.Controls.Add(Me.RadMenu1)
         Me.Name = "frmMain"
         '
@@ -318,11 +295,9 @@ Partial Class frmMain
         Me.Text = "Pristrygg"
         CType(Me.RadMenu1, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.lstLev, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.RadProgressBar1, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.chkVerifiering, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.cmdTransfer, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.lstFiles, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.toggleVerifiering, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.statusStrip, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.FrameLevfiler, System.ComponentModel.ISupportInitialize).EndInit()
         Me.FrameLevfiler.ResumeLayout(False)
@@ -362,19 +337,17 @@ Partial Class frmMain
     Friend WithEvents Office2013LightTheme1 As Telerik.WinControls.Themes.Office2013LightTheme
     Friend WithEvents Windows8Theme1 As Telerik.WinControls.Themes.Windows8Theme
     Friend WithEvents lstLev As Telerik.WinControls.UI.RadListControl
-    Friend WithEvents RadProgressBar1 As Telerik.WinControls.UI.RadProgressBar
     Friend WithEvents chkVerifiering As Telerik.WinControls.UI.RadCheckBox
     Friend WithEvents cmdTransfer As Telerik.WinControls.UI.RadButton
     Friend WithEvents lstFiles As Telerik.WinControls.UI.RadListControl
-    Friend WithEvents toggleVerifiering As Telerik.WinControls.UI.RadToggleSwitch
     Friend WithEvents statusStrip As Telerik.WinControls.UI.RadStatusStrip
-    Friend WithEvents labelText As Telerik.WinControls.UI.RadLabelElement
+    Friend WithEvents txtProgressBar As Telerik.WinControls.UI.RadLabelElement
     Friend WithEvents CommandBarSeparator1 As Telerik.WinControls.UI.CommandBarSeparator
-    Friend WithEvents labelProgressBar As Telerik.WinControls.UI.RadProgressBarElement
+    Friend WithEvents progressBarElement As Telerik.WinControls.UI.RadProgressBarElement
     Friend WithEvents CommandBarSeparator2 As Telerik.WinControls.UI.CommandBarSeparator
-    Friend WithEvents labelClock As Telerik.WinControls.UI.RadLabelElement
+    Friend WithEvents labelStatus As Telerik.WinControls.UI.RadLabelElement
     Friend WithEvents CommandBarSeparator3 As Telerik.WinControls.UI.CommandBarSeparator
-    Friend WithEvents labelTime As Telerik.WinControls.UI.RadLabelElement
+    Friend WithEvents labelDateTime As Telerik.WinControls.UI.RadLabelElement
     Friend WithEvents FrameLevfiler As Telerik.WinControls.UI.RadGroupBox
     Friend WithEvents frameLev As Telerik.WinControls.UI.RadGroupBox
     Friend WithEvents frameCmd As Telerik.WinControls.UI.RadGroupBox

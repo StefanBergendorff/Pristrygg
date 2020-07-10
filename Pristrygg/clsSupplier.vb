@@ -87,7 +87,7 @@
     End Property
 
     '-- Skapar poster.
-    Public Function CreatePosts(Optional sFileType As String = INI_FILE_INTERN) As Boolean
+    Public Function CreatePosts(Optional sFileType As String = INI_FILE_EXTERN_VILMA2) As Boolean
         Dim cString As New clsString
         Dim lsBuffer As String
         Dim lsTemp As String
@@ -107,7 +107,7 @@
             ElseIf sFileType = INI_FILE_INTERN_VILMA Then
                 lsIniFile = FixDirStr(Application.StartupPath) & INI_FILE_INTERN_VILMA
             ElseIf sFileType = INI_FILE_INTERN_VILMA2 Then
-                lsIniFile = FixDirStr(Application.StartupPath) & INI_FILE_INTERN_VILMA2 '2012-01-30
+                lsIniFile = FixDirStr(Application.StartupPath) & INI_FILE_INTERN_VILMA2
             Else
                 lsIniFile = FixDirStr(Application.StartupPath) & INI_FILE
                 '--->2012-01-30, ser efter om Vilma 2 körs

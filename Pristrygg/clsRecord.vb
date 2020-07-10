@@ -55,6 +55,8 @@
         End If
         dat(col) = data
 
+        Return True
+
     End Function
 
     Private Sub Class_Initialize()

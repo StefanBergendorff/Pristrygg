@@ -8,7 +8,7 @@
     Public oWshShell As Object                                  'Talks with the register
 
     '-- Namnet på applikationen. Anges som titel på alla messageboxar.
-    Public Const APPNAME As String = "PrisTryggRel8"
+    Public Const APPNAME As String = "PrisTryggRel11"
 
     '-- Ini-filen som definierar alla fält i Trygg.
     'Public Const INI_FILE As String = "finfo.ini"
@@ -68,10 +68,10 @@
     '-- REGISTER KONSTANTER
     '-- Register inställningar Mainkeys.
     'Public Const REG_MAIN_KEY = "HKEY_LOCAL_MACHINE\SOFTWARE\Sema"
-    Public Const REG_MAIN_KEY = "HKEY_CURRENT_USER\Software\"
+    Public Const REG_MAIN_KEY = "HKEY_CURRENT_USER\Software"
 
     '-- Regedit aktuella nycklar.
-    Public Const REG_APP_KEY As String = "PrisTryggRel8"
+    Public Const REG_APP_KEY As String = "PrisTryggRel11"
     Public Const REG_APP__UTV_KEY As String = "PrisTryggRel8Utv"
 
 
@@ -332,29 +332,35 @@
 
         Dim ar() As Object, l As Integer, ret As Collection
 
-        If c Is Nothing Then Exit Function
-        If c.Count = 0 Then
-            sortCollection = New Collection
-            Exit Function
-        End If
-        ReDim ar(0 To c.Count)
-        For l = 1 To c.Count
-            ar(l) = c(l)
-        Next l
-        Call quickSort(ar, 1, c.Count, col, numeric)
-        ret = New Collection
-        If descending Then
-            For l = c.Count To 1 Step -1
-                Call ret.Add(ar(l))
-                ar(l).Index = ret.Count
-            Next l
-        Else
+        Try
+            If c Is Nothing Then Return Nothing
+            If c.Count = 0 Then
+                sortCollection = New Collection
+                Return sortCollection
+            End If
+            ReDim ar(0 To c.Count)
             For l = 1 To c.Count
-                Call ret.Add(ar(l))
-                ar(l).Index = ret.Count
+                ar(l) = c(l)
             Next l
-        End If
-        sortCollection = ret
+            Call quickSort(ar, 1, c.Count, col, numeric)
+            ret = New Collection
+            If descending Then
+                For l = c.Count To 1 Step -1
+                    Call ret.Add(ar(l))
+                    ar(l).Index = ret.Count
+                Next l
+            Else
+                For l = 1 To c.Count
+                    Call ret.Add(ar(l))
+                    ar(l).Index = ret.Count
+                Next l
+            End If
+            sortCollection = ret
+            Return sortCollection
+
+        Catch ex As Exception
+            Return Nothing
+        End Try
 
     End Function
 

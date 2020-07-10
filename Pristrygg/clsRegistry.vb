@@ -148,27 +148,12 @@
     Public ReadOnly Property KeyExist(sKey As String) As Boolean
         Get
             'Key format "key\key\key"
-            Dim llBaseKey As Long
-            Dim lsSubKeys As String
-            Dim llResult As Long
-            Dim llRetval As Long
 
-            llBaseKey = f_GetBaseKey(sKey)
-            If llBaseKey = 0 Then
-                KeyExist = False
-
+            If My.Computer.Registry.GetValue(sKey, REG_VALUENAME_INDATA_DIR, Nothing) Is Nothing Then
+                Return False
             Else
-                lsSubKeys = f_GetSubKeys(sKey)
-                llRetval = RegOpenKeyEx(llBaseKey, lsSubKeys, 0, KEY_ALL_ACCESS, llResult)
-                If llRetval = ERROR_SUCCESS Then
-                    RegCloseKey(llResult)
-                    KeyExist = True
-                Else
-                    KeyExist = False
-                End If
-
+                Return True
             End If
-
 
         End Get
     End Property
@@ -176,36 +161,11 @@
     Public ReadOnly Property ValueExist(sKey As String, sValueName As String) As Boolean
         Get
             'Key format "key\key\key"
-            Dim llBaseKey As Long
-            Dim lsSubKeys As String
-            Dim llResult As Long
-            Dim llRetval As Long
-            Dim sBuffer As String
 
-            sBuffer = Space(255)
-            ValueExist = False
-
-            llBaseKey = f_GetBaseKey(sKey)
-            If llBaseKey = 0 Then
-                ValueExist = False
+            If My.Computer.Registry.GetValue(sKey, sValueName, "") = "" Then
+                Return False
             Else
-                lsSubKeys = f_GetSubKeys(sKey)
-                llRetval = RegOpenKeyEx(llBaseKey, lsSubKeys, 0, KEY_ALL_ACCESS, llResult)
-                If llRetval = ERROR_SUCCESS Then
-
-                    llRetval = RegQueryValueEx(llResult, sValueName, 0, 0, sBuffer,
-                    Len(sBuffer) - 1)
-
-                    If llRetval = ERROR_SUCCESS Then
-                        RegCloseKey(llBaseKey)
-                        RegCloseKey(llResult)
-                        ValueExist = True
-                    End If
-
-                Else
-                    ValueExist = False
-                End If
-
+                Return True
             End If
 
         End Get
@@ -213,246 +173,64 @@
 
     Public Sub AddKey(sKey As String)
         'Key format "key\key\key"
-        Dim llBaseKey As Long
-        Dim lsSubKeys As String
-        Dim llRetval As Long
-        Dim llCreate As Long
-        Dim llResult As Long
-        Dim SA As SECURITY_ATTRIBUTES
 
-        On Error GoTo EH
+        Try
+            My.Computer.Registry.CurrentUser.CreateSubKey(sKey)
 
-        llBaseKey = f_GetBaseKey(sKey)
-        If llBaseKey = 0 Then
-            'Err.Raise Number:=vbObjectError + ERR_WRONG_MAINKEY,
-            ' Description:="Ingen, eller felaktig rotnyckel",
-            ' Source:="clsRegistry_AddKey"
-        Else
-            lsSubKeys = f_GetSubKeys(sKey)
+            Exit Sub
 
-            If lsSubKeys = "" Then
-                '    Err.Raise Number:=vbObjectError + ERR_WRONG_MAINKEY,
-                '    Description:="Kan inte skapa rotnyckel " & sKey,
-                '    Source:="clsRegistry_AddKey"
-            Else
+        Catch ex As Exception
+            MsgBox("Kunde inte skapa nyckel. Nyckel " & sKey, MsgBoxStyle.Exclamation)
 
-                llRetval = RegCreateKeyEx(llBaseKey, lsSubKeys, 0, "", REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, SA, llResult, llCreate)
-                If llRetval <> ERROR_SUCCESS Then
-                    '    Err.Raise Number:=vbObjectError + ERR_CREATE_KEY,
-                    '    Description:="Fel vid skapande av " & sKey,
-                    '    Source:="clsRegistry_AddKey"
-                End If
-
-            End If
-
-        End If
-
-        Exit Sub
-
-EH:
-        'Err.Raise Number:=Err.Number,
-        ' Description:=Err.Description,
-        ' Source:="clsRegistry_AddKey"
-
+        End Try
 
     End Sub
 
     Public Sub DeleteKey(sKey As String)
         'Key format "key\key\key"
-        Dim llBaseKey As Long
-        Dim lsSubKeys As String
-        Dim llRetval As Long
-        Dim llCreate As Long
-        Dim SA As SECURITY_ATTRIBUTES
+        Try
+            My.Computer.Registry.CurrentUser.DeleteSubKey(sKey)
 
-        On Error GoTo EH
+            Exit Sub
 
-        llBaseKey = f_GetBaseKey(sKey)
-        If llBaseKey = 0 Then
-            'Err.Raise Number:=vbObjectError + ERR_WRONG_MAINKEY,
-            ' Description:="Ingen, eller felaktig rotnyckel",
-            ' Source:="clsRegistry_DeleteKey"
-        Else
-            lsSubKeys = f_GetSubKeys(sKey)
-            If lsSubKeys = "" Then
-                '     Err.Raise Number:=vbObjectError + ERR_DELETE_KEY,
-                '     Description:="Kan inte ta bort rotnyckel " & sKey,
-                '     Source:="clsRegistry_DeleteKey"
-            Else
+        Catch ex As Exception
+            MsgBox("Kunde inte ta bort nyckel. Nyckel " & sKey, MsgBoxStyle.Exclamation)
 
-                llRetval = RegDeleteKey(llBaseKey, lsSubKeys)
-                If llRetval <> ERROR_SUCCESS Then
-                    '    Err.Raise Number:=vbObjectError + ERR_DELETE_KEY,
-                    '   Description:="Fel vid delete av " & sKey,
-                    '   Source:="clsRegistry_DeleteKey"
-                End If
-
-            End If
-
-        End If
-
-        Exit Sub
-
-EH:
-        'Err.Raise Number:=Err.Number,
-        ' Description:=Err.Description,
-        ' Source:="clsRegistry_DeleteKey"
+        End Try
 
     End Sub
 
     Public Sub AddValue(sKey As String, sValueName As String, sValue As String)
         'Key format "key\key\key"
-        Dim llBaseKey As Long
-        Dim lsSubKeys As String
-        Dim llResult As Long
-        Dim llRetval As Long
 
-        On Error GoTo EH
-
-        llBaseKey = f_GetBaseKey(sKey)
-        If llBaseKey = 0 Then
-            'Err.Raise Number:=vbObjectError + ERR_WRONG_MAINKEY,
-            ' Description:="Ingen, eller felaktig rotnyckel",
-            ' Source:="clsRegistry_AddValue"
-
-        Else
-            lsSubKeys = f_GetSubKeys(sKey)
-            llRetval = RegOpenKeyEx(llBaseKey, lsSubKeys, 0, KEY_ALL_ACCESS, llResult)
-            If llRetval <> ERROR_SUCCESS Then
-                '    Err.Raise Number:=vbObjectError + ERR_OPEN_KEY,
-                '    Description:="Fel vid öppning av " & sKey,
-                '    Source:="clsRegistry_AddValue"
-            End If
-
-            'För att undvika krasch.
-            If Len(sValue) = 0 Then sValue = ""
-
-            llRetval = RegSetValueEx(llResult, sValueName, 0, REG_SZ,
-      sValue, CLng(Len(sValue) + 1))
-
-            If llRetval <> ERROR_SUCCESS Then
-                'Err.Raise Number:=vbObjectError + ERR_WRITE_VALUE,
-                ' Description:="Fel vid skrivning av värdet " & sValueName,
-                ' Source:="clsRegistry_AddValue"
-            End If
-
-            RegCloseKey(llBaseKey)
-            RegCloseKey(llResult)
-
-
-        End If
-
-        Exit Sub
-
-EH:
-        'Err.Raise Number:=Err.Number,
-        ' Description:=Err.Description,
-        ' Source:="clsRegistry_AddValue"
-
-
+        Try
+            My.Computer.Registry.SetValue(sKey, sValueName, sValue)
+        Catch ex As Exception
+            MsgBox("Värde till registret kunde inte skapas. Nyckel " & sKey & "\" & sValueName, MsgBoxStyle.Exclamation)
+        End Try
 
     End Sub
 
     Public Sub DeleteValue(sKey As String, sValueName As String)
         'Key format "key\key\key"
-        Dim llBaseKey As Long
-        Dim lsSubKeys As String
-        Dim llResult As Long
-        Dim llRetval As Long
 
-        On Error GoTo EH
-
-        llBaseKey = f_GetBaseKey(sKey)
-        If llBaseKey = 0 Then
-            'Err.Raise Number:=vbObjectError + ERR_WRONG_MAINKEY,
-            ' Description:="Ingen, eller felaktig rotnyckel",
-            ' Source:="clsRegistry_DeleteValue"
-
-        Else
-            lsSubKeys = f_GetSubKeys(sKey)
-            llRetval = RegOpenKeyEx(llBaseKey, lsSubKeys, 0, KEY_ALL_ACCESS, llResult)
-            If llRetval <> ERROR_SUCCESS Then
-                '    Err.Raise Number:=vbObjectError + ERR_OPEN_KEY,
-                '    Description:="Fel vid öppning av " & sKey,
-                '    Source:="clsRegistry_DeleteValue"
-            End If
-
-            llRetval = RegDeleteValue(llResult, sValueName)
-
-            If llRetval <> ERROR_SUCCESS Then
-                'Err.Raise Number:=vbObjectError + ERR_DELETE_VALUE,
-                ' Description:="Fel vid delete av värdet " & sValueName,
-                ' Source:="clsRegistry_DeleteValue"
-            End If
-
-            RegCloseKey(llResult)
-
-
-        End If
-
-        Exit Sub
-
-EH:
-        'Err.Raise Number:=Err.Number,
-        ' Description:=Err.Description,
-        ' Source:="clsRegistry_DeleteValue"
-
-
+        Try
+            My.Computer.Registry.CurrentUser.DeleteValue(sKey, sValueName)
+        Catch ex As Exception
+            MsgBox("Kunde inte ta bort ett värde. Nyckel " & sKey & "\" & sValueName, MsgBoxStyle.Exclamation)
+        End Try
 
     End Sub
 
     Public Function RetriveValue(sKey As String, sValueName As String) As String
         'Key format "key\key\key"
-        Dim llBaseKey As Long
-        Dim lsSubKeys As String
-        Dim llResult As Long
-        Dim llRetval As Long
-        Dim lsBuffer As String
 
-        On Error GoTo EH
-
-        lsBuffer = Space(255)
-
-        llBaseKey = f_GetBaseKey(sKey)
-        If llBaseKey = 0 Then
-            'Err.Raise Number:=vbObjectError + ERR_WRONG_MAINKEY,
-            ' Description:="Ingen, eller felaktig rotnyckel",
-            ' Source:="clsRegistry_RetriveValue"
-
-        Else
-            lsSubKeys = f_GetSubKeys(sKey)
-            llRetval = RegOpenKeyEx(llBaseKey, lsSubKeys, 0, KEY_ALL_ACCESS, llResult)
-            If llRetval <> ERROR_SUCCESS Then
-                'Err.Raise Number:=vbObjectError + ERR_OPEN_KEY,
-                ' Description:="Fel vid öppning av " & sKey,
-                ' Source:="clsRegistry_RetriveValue"
-            End If
-
-            llRetval = RegQueryValueEx(llResult, sValueName, 0, 0, lsBuffer,
-                 Len(lsBuffer) - 1)
-
-            If llRetval <> ERROR_SUCCESS Then
-                'Err.Raise Number:=vbObjectError + ERR_READ_VALUE,
-                ' Description:="Fel vid läsning av värdet " & sValueName,
-                ' Source:="clsRegistry_RetriveValue"
-            End If
-
-            RegCloseKey(llBaseKey)
-            RegCloseKey(llResult)
-
-            'plocka bor skräp innan.
-            RetriveValue = f_RemoveSpaces(lsBuffer)
-
-        End If
-
-        Exit Function
-
-EH:
-        'Err.Raise Number:=Err.Number,
-        ' Description:=Err.Description,
-        ' Source:="clsRegistry_RetriveValue"
-
-
+        Try
+            RetriveValue = My.Computer.Registry.GetValue(sKey, sValueName, "")
+        Catch ex As Exception
+            MsgBox("Värdet kunde inte hämtas. Nyckel " & sKey & "\" & sValueName, MsgBoxStyle.Exclamation)
+            Return ""
+        End Try
 
     End Function
 
@@ -513,7 +291,7 @@ EH:
         Else
             llPos = InStr(1, sKey, "\")
             If llPos > 0 Then
-                f_GetSubKeys = Right$(sKey, Len(sKey) - llPos)
+                f_GetSubKeys = Right(sKey, Len(sKey) - llPos)
             Else
                 f_GetSubKeys = ""
             End If

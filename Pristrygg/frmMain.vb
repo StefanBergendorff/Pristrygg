@@ -1,4 +1,5 @@
-﻿Imports Excel = Microsoft.Office.Interop.Excel
+﻿Imports System.ComponentModel
+Imports Excel = Microsoft.Office.Interop.Excel
 
 
 Public Class frmMain
@@ -6,25 +7,67 @@ Public Class frmMain
     Private RecordCounter As Long
     Private bTransfer As Boolean
     Private sTryggFile As String
-    Public oCounterPanel As Panel                               'To the counter in main window
 
     Private Sub mnuSettings_Click(sender As Object, e As EventArgs) Handles mnuSettings.Click
-
+        FrmParameters.Show()
     End Sub
 
     Private Sub mnuExit_Click(sender As Object, e As EventArgs) Handles mnuExit.Click
-
+        Me.Close()
     End Sub
 
     Private Sub mnuNewSupplier_Click(sender As Object, e As EventArgs) Handles mnuNewSupplier.Click
 
+        cLev = New clsSupplier
+        If Not cLev.CreatePosts Then Exit Sub
+        FrmSupplierTemplate.Tag = "NEWLEV"
+        FrmSupplierTemplate.Show()
+        Me.Hide()
+
     End Sub
 
     Private Sub mnuUpdateSupplier_Click(sender As Object, e As EventArgs) Handles mnuUpdateSupplier.Click
+        On Error GoTo EH
+
+        If Not LoadIniFile() Then Exit Sub
+
+        FrmSupplierTemplate.Tag = "OLDLEV"
+        FrmSupplierTemplate.Show()
+        Me.Hide()
+
+        Exit Sub
+
+EH:
+        MsgBox("Ett fel har inträffat." & vbCrLf & "Felbeskrivning :  " & Err.Description, vbInformation, APPNAME)
+
 
     End Sub
 
     Private Sub mnuDeleteSupplier_Click(sender As Object, e As EventArgs) Handles mnuDeleteSupplier.Click
+
+        Dim lsLevFile As String
+
+        lsLevFile = lstLev.SelectedItem.Text
+
+        If Len(lsLevFile) = 0 Then
+            MsgBox("Markera den leverantör i listan som ska tas bort.", vbInformation, APPNAME)
+            Exit Sub
+        End If
+
+        If MsgBox("Är du säker på att du vill plocka bort leverantör " & lsLevFile & " ?", vbYesNo + vbQuestion, APPNAME) = vbNo Then
+            Exit Sub
+        End If
+
+        Kill(FixDirStr(APP_DIR_MALL) & lsLevFile)
+
+        MsgBox("Leverantören borttagen.", vbInformation)
+
+        UpdateListboxes()
+
+        Exit Sub
+
+EH:
+        MsgBox("Ett fel har inträffat." & vbCrLf & "Felbeskrivning :  " & Err.Description, vbInformation, APPNAME)
 
     End Sub
 
@@ -36,21 +79,7 @@ Public Class frmMain
 
     End Sub
 
-
-    Private Sub chkVerifiering_Click()
-
-        If chkVerifiering.Checked = True Then
-            cmdTransfer.Text = "Verifiera filen"
-            toggleVerifiering.Value = True
-        Else
-            cmdTransfer.Text = "Skapa fil till Trygg"
-            toggleVerifiering.Value = False
-        End If
-
-    End Sub
-
-
-    Private Sub cmdTransfer_Click()
+    Private Sub cmdTransfer_Click(sender As Object, e As EventArgs) Handles cmdTransfer.Click
 
         Dim s As String
 
@@ -102,8 +131,8 @@ Public Class frmMain
             End If
         End If
 
-        statusStrip.Items(0).Text = ""
-        Me.Cursor = Cursors.WaitCursor
+        labelStatus.Text = ""
+        Me.Cursor = Cursors.Default
 
         '--->2009-08-20
 EH:
@@ -124,121 +153,130 @@ EH:
         Dim lsBackUpDirChild As String
         Dim lsBackUpFil As String
         Dim s As String
+        Dim i As Integer
 
-        On Error GoTo EH
+        lsUtFil = ""
+        lsInfil = ""
+        Try
 
-        '-- Kontroll att indatafil är vald.
-        If lstFiles.SelectedItem Is Nothing Then
-            MsgBox("Markera fil från leverantör.", vbInformation, APPNAME)
-            Exit Sub
-        End If
-
-        lsInfil = FixDirStr(APP_DIR_INDATA) & lstFiles.SelectedItem.Text
-        sTryggFile = "TRBTE00"
-        lsUtFil = FixDirStr(APP_DIR_UTDATA) & sTryggFile
-
-        lsBackUpDirParent = FixDirStr(APP_DIR_INDATA) & "backup"
-        lsBackUpDirChild = lsBackUpDirParent & "\" & Format(System.DateTime.Now, "YYYYMMDD")
-        lsBackUpFil = lsBackUpDirChild & "\" & lstFiles.SelectedItem.Text
-
-        '-- Kontroll att utdatakatalog existerar.
-        If Not DirExist(APP_DIR_UTDATA) Then
-            MsgBox("Katalogen " & UCase(APP_DIR_UTDATA) & " där filen till Trygg skapas finns inte." & vbCrLf &
-             "Gå in i inställningar och skriv in en giltig sökväg.", vbInformation, APPNAME)
-            Exit Sub
-        End If
-
-        '-- Om gammal Trygg_fil finns kvar, fråga om denna ska tas bort.
-        statusStrip.Items(0).Text = "Kontrollerar infilen och mallen..."
-        If FileExists(lsUtFil) Then
-            Kill(lsUtFil)
-        End If
-
-        Me.Cursor = Cursors.WaitCursor
-
-        '-- Läs i  n egenskaper från mall-fil till objektet.
-        If Not LoadIniFile() Then
-            Me.Cursor = Cursors.Default
-            Exit Sub
-        End If
-
-
-        '-- Om det är en excel-fil från leverantören, gör om den till en textfil.
-        If cLev.FileFormat = FILE_EXCEL_ANSI Or cLev.FileFormat = FILE_EXCEL_DOS Then
-            statusStrip.Items(0).Text = "Omvandla Excelfil till textfil..."
-
-            '-- Skapa namnet på textfilen (xls byts mot txt)
-            lsTextFil = lsInfil.Substring(1, Len(lsInfil) - 3) & "txt"
-
-            '-- Konverterar [lsInfil] från excel-format till textformat.
-            If Not ConvertExcelToText(lsInfil, lsTextFil) Then
-                Me.Cursor = Cursors.Default
-                MsgBox("Fel vid konvertering av " & lsInfil & " till en textfil.", vbInformation, APPNAME)
+            '-- Kontroll att indatafil är vald.
+            If lstFiles.SelectedItem Is Nothing Then
+                MsgBox("Markera fil från leverantör.", vbInformation, APPNAME)
                 Exit Sub
             End If
 
-            '-- Sätt infilen till den skapade textfilen. Spara excel-filen i [lsOldInFil]
-            lsOldInFil = lsInfil
-            lsInfil = lsTextFil
+            lsInfil = FixDirStr(APP_DIR_INDATA) & lstFiles.SelectedItem.Text
+            sTryggFile = "TRBTE00"
+            lsUtFil = FixDirStr(APP_DIR_UTDATA) & sTryggFile
+            lsOldInFil = 0
 
-        End If
+            lsBackUpDirParent = FixDirStr(APP_DIR_INDATA) & "backup"
 
-        '-- Skapa utdatafil till Trygg.
-        statusStrip.Items(0).Text = "Omvandlar infilen till Trygguppgifter..."
-        Me.Cursor = Cursors.WaitCursor
-        If Not CreateTryggFile(lsInfil, lsUtFil) Then
-            Me.Cursor = Cursors.Default
-            Exit Sub
-        End If
+            lsBackUpDirChild = lsBackUpDirParent & "\" & Format(System.DateTime.Now, "yyyyMMdd")
+            lsBackUpFil = lsBackUpDirChild & "\" & lstFiles.SelectedItem.Text
 
-        statusStrip.Items(0).Text = "Kopierar till Trygg och rensar upp..."
-        If cLev.FileFormat = FILE_EXCEL_ANSI Or cLev.FileFormat = FILE_EXCEL_DOS Then
-            '-- Döda textfilen.
-            Kill(lsInfil)
-            '-- Sätt [lsInFil] till orginal-excelfilen för backup.
-            lsInfil = lsOldInFil
-        End If
-
-
-        Me.Cursor = Cursors.Default
-
-        If chkVerifiering.Checked = False Then  'Inte endast verifiering
-
-            '-- Finns inte katalogen [APP_DIR_INDATA]\backup, skapa den.
-            If Not DirExist(lsBackUpDirParent) Then MkDir(lsBackUpDirParent)
-
-            '-- Finns inte katalogen [APP_DIR_INDATA]\backup\'dagens datum', skapa den.
-            If Not DirExist(lsBackUpDirChild) Then MkDir(lsBackUpDirChild)
-
-            '-- Finns det redan en fil med samma namn i [APP_DIR_INDATA]\backup\'dagens datum' ?
-            If FileExists(lsBackUpFil) Then
-                Kill(lsBackUpFil)
+            '-- Kontroll att utdatakatalog existerar.
+            If Not DirExist(APP_DIR_UTDATA) Then
+                MsgBox("Katalogen " & UCase(APP_DIR_UTDATA) & " där filen till Trygg skapas finns inte." & vbCrLf &
+                 "Gå in i inställningar och skriv in en giltig sökväg.", vbInformation, APPNAME)
+                Exit Sub
             End If
 
-            '-- Flyttar behandlad leverantörsfil till backupkatalog.
-            'Name lsInfil As lsBackUpFil
-            FileCopy(lsInfil, lsBackUpFil)
-            Kill(lsInfil)
+            '-- Om gammal Trygg_fil finns kvar, fråga om denna ska tas bort.
+            labelStatus.Text = "Kontrollerar infilen och mallen..."
+            If FileExists(lsUtFil) Then
+                Kill(lsUtFil)
+            End If
 
+            Me.Cursor = Cursors.WaitCursor
+
+            '-- Läs i  n egenskaper från mall-fil till objektet.
+            If Not LoadIniFile() Then
+                Me.Cursor = Cursors.Default
+                Exit Sub
+            End If
+
+
+            '-- Om det är en excel-fil från leverantören, gör om den till en textfil.
+            If cLev.FileFormat = FILE_EXCEL_ANSI Or cLev.FileFormat = FILE_EXCEL_DOS Then
+                labelStatus.Text = "Omvandla Excelfil till textfil..."
+
+                '-- Skapa namnet på textfilen (xls byts mot txt)
+                i = InStrRev(lsInfil, ".")
+                If i = 0 Then
+                    lsTextFil = lsInfil.Trim & ".txt"
+                Else
+                    lsTextFil = lsInfil.Substring(0, i) & "txt"
+                End If
+
+                '-- Konverterar [lsInfil] från excel-format till textformat.
+                If Not ConvertExcelToText(lsInfil, lsTextFil) Then
+                    Me.Cursor = Cursors.Default
+                    MsgBox("Fel vid konvertering av " & lsInfil & " till en textfil.", vbInformation, APPNAME)
+                    Exit Sub
+                End If
+
+                '-- Sätt infilen till den skapade textfilen. Spara excel-filen i [lsOldInFil]
+                lsOldInFil = lsInfil
+                lsInfil = lsTextFil
+
+            End If
+
+            '-- Skapa utdatafil till Trygg.
+            labelStatus.Text = "Omvandlar infilen till Trygguppgifter..."
+            Me.Cursor = Cursors.WaitCursor
+            If Not CreateTryggFile(lsInfil, lsUtFil) Then
+                Me.Cursor = Cursors.Default
+                Exit Sub
+            End If
+
+            labelStatus.Text = "Kopierar till Trygg och rensar upp..."
+            If cLev.FileFormat = FILE_EXCEL_ANSI Or cLev.FileFormat = FILE_EXCEL_DOS Then
+                '-- Döda textfilen.
+                Kill(lsInfil)
+                '-- Sätt [lsInFil] till orginal-excelfilen för backup.
+                lsInfil = lsOldInFil
+            End If
+
+
+            Me.Cursor = Cursors.Default
+
+            If chkVerifiering.Checked = False Then  'Inte endast verifiering
+
+                '-- Finns inte katalogen [APP_DIR_INDATA]\backup, skapa den.
+                If Not DirExist(lsBackUpDirParent) Then MkDir(lsBackUpDirParent)
+
+                '-- Finns inte katalogen [APP_DIR_INDATA]\backup\'dagens datum', skapa den.
+                If Not DirExist(lsBackUpDirChild) Then MkDir(lsBackUpDirChild)
+
+                '-- Finns det redan en fil med samma namn i [APP_DIR_INDATA]\backup\'dagens datum' ?
+                If FileExists(lsBackUpFil) Then
+                    Kill(lsBackUpFil)
+                End If
+
+                '-- Flyttar behandlad leverantörsfil till backupkatalog.
+                'Name lsInfil As lsBackUpFil
+                FileCopy(lsInfil, lsBackUpFil)
+                Kill(lsInfil)
+
+                UpdateListboxes()
+            End If
+
+            bTransfer = True
+
+
+        Catch ex As Exception
             UpdateListboxes()
-        End If
+            s = "Ett fel har inträffat." & vbCrLf
+            s = s & "Felbeskrivning :  " & ex.Message & vbCrLf
+            s = s & "Filen " & lsUtFil & " har dock skapats." & vbCrLf
+            If ex.HResult = 70 Then
+                s = s & "OBS! Felet är att " & lsInfil & " inte går att ta bort!" & vbCrLf
+                s = s & "Filen kanske är uppe i Excel? - I så fall stäng Excel"
+            End If
+            MsgBox(s, vbInformation, APPNAME)
 
-        bTransfer = True
-        On Error GoTo 0
-
-        Exit Sub
-
-EH:
-        UpdateListboxes()
-        s = "Ett fel har inträffat." & vbCrLf
-        s = s & "Felbeskrivning :  " & Err.Description & vbCrLf
-        s = s & "Filen " & lsUtFil & " har dock skapats." & vbCrLf
-        If Err.Number = 70 Then
-            s = s & "OBS! Felet är att " & lsInfil & " inte går att ta bort!" & vbCrLf
-            s = s & "Filen kanske är uppe i Excel? - I så fall stäng Excel"
-        End If
-        MsgBox(s, vbInformation, APPNAME)
-        On Error GoTo 0
+        End Try
 
     End Sub
 
@@ -280,7 +318,7 @@ EH:
         End If
 
         lsInfil = FixDirStr(APP_DIR_INDATA) & lstFiles.SelectedItem.Text
-        statusStrip.Items(0).Text = "Bestämer Finfo/Vilma..."
+        labelStatus.Text = "Bestämer Finfo/Vilma..."
 
         'Kontrollera längden
         FnrIn = FreeFile()
@@ -406,7 +444,7 @@ EH:
             Exit Sub
         End If
 
-        statusStrip.Items(0).Text = "Kontrollerar infilen..."
+        labelStatus.Text = "Kontrollerar infilen..."
         lsUtFil = "TRBTF00"
         If bVilma = True Then
             lsUtFil = "TRBTV00"
@@ -474,7 +512,7 @@ EH:
         bFileOpen = False
 
         '-- Kopiera den kontrollerade FINFO-filen till [APP_DIR_UTDATA]
-        statusStrip.Items(0).Text = "Kopierar till Trygg och rensar upp..."
+        labelStatus.Text = "Kopierar till Trygg och rensar upp..."
         FileCopy(lsInfil, lsUtFil)
 
         If chkVerifiering.Checked = False Then  'Inte endast verifiering
@@ -569,103 +607,111 @@ EH:
 
         Dim xlApp As Excel.Application
         Dim xlWorkBook As Excel.Workbook
+        Dim i As Integer
 
-        On Error GoTo EH
+        Try
 
-        ConvertExcelToText = False
+            ConvertExcelToText = False
 
-        '-- Kontroll att [sInFil] är en excel-fil
-        If Not UCase(sInfil.Trim.Substring(-3)) = "XLS" Then
-            If Not UCase(sInfil.Trim.Substring(-4)) = "XLSX" Then
+            '-- Kontroll att [sInFil] är en excel-fil
+            i = InStrRev(sInfil, ".")
+            If i > 0 Then
+                If UCase(sInfil.Substring(i, 3)) <> "XLS" Then
+                    i = 0
+                End If
+            End If
+            If i = 0 Then
                 MsgBox("Ej en giltig excel-fil. Ska ha ändelsen 'xls', eller 'xlsx." & vbCrLf & "Ingen fil skapad.", vbInformation, APPNAME)
                 Exit Function
             End If
-        End If
 
-        xlApp = New Excel.Application
-        xlWorkBook = xlApp.Workbooks.Open(sInfil)
+            xlApp = New Excel.Application
+            xlWorkBook = xlApp.Workbooks.Open(sInfil)
 
-        '-- Ta bort gammal fil om sådan finns.
-        If FileExists(sTextFil) Then
-            Kill(sTextFil)
-        End If
+            '-- Ta bort gammal fil om sådan finns.
+            If FileExists(sTextFil) Then
+                Kill(sTextFil)
+            End If
 
-        'siffran 20 i nedanstående gör at den spara som windows text.
-        'MEN den sparar ner decimalkomma som decimalpunkt vilket kan bli problem ibland med tal med många decimaler
-        xlWorkBook.SaveAs(sTextFil, 20)
-        xlWorkBook.Close(False)
+            'siffran 20 i nedanstående gör at den spara som windows text.
+            'MEN den sparar ner decimalkomma som decimalpunkt vilket kan bli problem ibland med tal med många decimaler
+            xlWorkBook.SaveAs(sTextFil, 20)
+            xlWorkBook.Close(False)
 
-        xlWorkBook = Nothing
-        xlApp = Nothing
+            xlWorkBook = Nothing
+            xlApp = Nothing
 
-        ConvertExcelToText = True
-        On Error GoTo 0
+            ConvertExcelToText = True
 
-        Exit Function
+        Catch ex As Exception
+            MsgBox("Ett fel har inträffat." & vbCrLf & "Felbeskrivning :  " & ex.Message & vbCrLf &
+              "Ingen fil skapad.", vbInformation, APPNAME)
+            Return False
+        End Try
 
-EH:
-        MsgBox("Ett fel har inträffat." & vbCrLf & "Felbeskrivning :  " & Err.Description & vbCrLf &
-          "Ingen fil skapad.", vbInformation, APPNAME)
-
-        On Error GoTo 0
 
     End Function
 
 
 
-    Private Sub Form_Load()
+
+    Private Sub frmMain_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
         oWshShell = CreateObject("WScript.Shell")
         GetSaveWindowsPreferences("Get", Me)
+        labelDateTime.Text = Date.Now.ToString
+        labelStatus.Text = ""
 
         'Gör vissa kontroller visable = No
+        progressBarElement.Value1 = 0
+        progressBarElement.Visibility = Telerik.WinControls.ElementVisibility.Hidden
+        txtProgressBar.Visibility = Telerik.WinControls.ElementVisibility.Hidden
+
 
     End Sub
 
-    Private Sub Form_Resize()
+
+    Private Sub frmMain_Resize(sender As Object, e As EventArgs) Handles Me.Resize
 
         Dim lW As Long
         Dim lH As Long
         Dim dblFactorW As Double
         Dim dblFactorH As Double
-        Dim l As Long
 
         lW = System.Math.Abs(Me.Width - 100)
         lH = System.Math.Abs(Me.Height - 100)
-        dblFactorW = 0.97
-        dblFactorH = 0.92
+        dblFactorW = 0.95
+        dblFactorH = 0.87
 
-        frameCmd.Height = System.Math.Abs(lH * dblFactorH)
+        frameCmd.Height = System.Math.Abs(lH * (dblFactorH + 0.15))
 
         frameLev.Height = System.Math.Abs(frameCmd.Height * 0.4)
-        frameLev.Height = System.Math.Abs(frameCmd.Height * 0.5)
-        lstLev.Height = System.Math.Abs(frameLev.Height * dblFactorH)
-        frameLev.Width = System.Math.Abs((lW - frameCmd.Width - 300) * dblFactorW)
+        lstLev.Height = System.Math.Abs(frameLev.Height * (dblFactorH - 0.035))
+        frameLev.Width = System.Math.Abs(lW - frameCmd.Width - 30)
         lstLev.Width = System.Math.Abs(frameLev.Width * dblFactorW)
 
-        FrameLevfiler.Top = System.Math.Abs(frameLev.Top + frameLev.Height + 200)
-        FrameLevfiler.Height = System.Math.Abs(frameCmd.Height * 0.28)
-        FrameLevfiler.Height = System.Math.Abs(frameCmd.Height * 0.47)    'Då FrameTryggfiler inte är visible längre
-        lstFiles.Height = System.Math.Abs(FrameLevfiler.Height * (dblFactorH - 0.08))
-        FrameLevfiler.Width = FrameLev.Width
+        FrameLevfiler.Top = System.Math.Abs(frameLev.Top + frameLev.Height + 10)
+        FrameLevfiler.Height = System.Math.Abs(frameCmd.Height * 0.57)
+        lstFiles.Height = System.Math.Abs(FrameLevfiler.Height * (dblFactorH + 0.01))
+        FrameLevfiler.Width = frameLev.Width
         lstFiles.Width = lstLev.Width
 
     End Sub
 
-    Private Sub Form_Unload(Cancel As Integer)
+    Private Sub frmMain_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
 
         GetSaveWindowsPreferences("Save", Me)
 
     End Sub
 
-    Private Sub Form_Activate()
+    Private Sub frmMain_Activated(sender As Object, e As EventArgs) Handles Me.Activated
         On Error GoTo EH
 
-        Me.Text = "PrisTrygg.  Version : " & App.Major & "." & App.Minor & "." & App.Revision
+        Me.Text = "PrisTrygg.  Version : " & Application.ProductVersion
 
 
         '-- Om inte alla registervärden är satta så visa fönster med inställningar
-        '-- "frmSettings". Om vi kommer i retur från "frmSettings" via "Avbryt-knappen"
+        '-- "frmParameters". Om vi kommer i retur från "frmParameters" via "Avbryt-knappen"
         '-- och nödvändiga registervärden inte är satta så meddelas detta till användaren
         '-- vars enda valmöjligheter är att avsluta programmet eller gå till inställningar.
 
@@ -677,7 +723,7 @@ EH:
             Call SetRegistryValues()
         End If
 
-        '-- Kommer från frmLeverantor. Registervärden redan satta.
+        '-- Kommer från frmSupplierTemplate. Registervärden redan satta.
         If Me.Tag = "LEV" Then
             Me.Tag = ""
         Else
@@ -692,7 +738,8 @@ EH:
                     Exit Sub
                 Else
                     '-- Fönster med inställningar visas.
-                    frmSettings.Show
+                    FrmParameters.Show()
+                    FrmParameters.BringToFront()
                     Exit Sub
                 End If
             End If
@@ -737,11 +784,6 @@ EH:
         '-- Register-sökväg.
         lsKey = REG_MAIN_KEY & "\" & REG_APP_KEY
 
-        'Hämtar inställningarna från utveckling om jag kör i utvecklingsmiljön
-        If InStr(UCase(App.Path), UCase("C:\Utveckling\")) > 0 Then
-            lsKey = REG_MAIN_KEY & "\" & REG_APP__UTV_KEY
-        End If
-
         '-- Skapa nyckel om den inte finns.
         If Not cRegEdit.KeyExist(lsKey) Then cRegEdit.AddKey(lsKey)
 
@@ -774,11 +816,6 @@ EH:
         '-- [REG_MAIN_KEY] + [REG_APP_KEY]
         lsKey = REG_MAIN_KEY & "\" & REG_APP_KEY
 
-        'Hämtar inställningarna från utveckling om jag kör i utvecklingsmiljön
-        If InStr(UCase(App.Path), UCase("C:\Utveckling\")) > 0 Then
-            lsKey = REG_MAIN_KEY & "\" & REG_APP__UTV_KEY
-        End If
-
         If cRegEdit.KeyExist(lsKey) Then
 
             '-- Kataloger är skapade.
@@ -790,9 +827,6 @@ EH:
         Exit Function
 
 EH:
-        'Err.Raise Number:=Err.Number,
-        ' Source:="RegAppDirExist",
-        ' Description:=Err.Description
 
     End Function
 
@@ -805,7 +839,6 @@ EH:
     '-- ====================================================================================
     Private Function ReitriveRegEditSettings() As Boolean
         Dim cRegEdit As New clsRegistry
-        Dim cCrypt As New clsCrypt
 
         Dim lbTemp As Boolean
         Dim lsKey As String
@@ -816,11 +849,6 @@ EH:
         '-- Fullständig sökväg till nyckeln med registervärden.
         '-- [REG_MAIN_KEY] + [REG_APP_KEY]
         lsKey = REG_MAIN_KEY & "\" & REG_APP_KEY
-
-        'Hämtar inställningarna från utveckling om jag kör i utvecklingsmiljön
-        If InStr(UCase(Application.StartupPath), UCase("C:\Utveckling\")) > 0 Then
-            lsKey = REG_MAIN_KEY & "\" & REG_APP__UTV_KEY
-        End If
 
         '-- Om nyckel finns, ta fram värden
         If cRegEdit.KeyExist(lsKey) Then
@@ -897,7 +925,7 @@ EH:
                     APP_VILMA2_FLAG = "0"
                 End If
             Else
-                APP_VILMA2_FLAG = "0"
+                APP_VILMA2_FLAG = "1"   'Sätter den alltid till Vilma2
             End If
             '---<2012-01-30
 
@@ -912,52 +940,8 @@ EH:
             End If
             '---<2013-03-07
 
-            If False Then '2005-03-29
-                '-- FTP Host
-                If cRegEdit.ValueExist(lsKey, REG_VALUENAME_FTP_HOST) Then
-                    APP_FTP_HOST = cRegEdit.RetriveValue(lsKey, REG_VALUENAME_FTP_HOST)
-                    If Len(APP_FTP_HOST) = 0 Then lbTemp = False
-                Else
-                    lbTemp = False
-                End If
-
-                '-- FTP User
-                If cRegEdit.ValueExist(lsKey, REG_VALUENAME_FTP_USER) Then
-                    APP_FTP_USER = cRegEdit.RetriveValue(lsKey, REG_VALUENAME_FTP_USER)
-                    If Len(APP_FTP_USER) = 0 Then lbTemp = False
-                Else
-                    lbTemp = False
-                End If
-
-                '-- FTP PassWord
-                If cRegEdit.ValueExist(lsKey, REG_VALUENAME_FTP_PW) Then
-                    APP_FTP_PW = cCrypt.DeCrypt(cRegEdit.RetriveValue(lsKey, REG_VALUENAME_FTP_PW))
-                    If Len(APP_FTP_PW) = 0 Then lbTemp = False
-                Else
-                    lbTemp = False
-                End If
-
-                '-- FTP Command BTE
-                If cRegEdit.ValueExist(lsKey, REG_VALUENAME_FTP_COMMAND_BTE) Then
-                    APP_FTP_COMMAND_BTE = cRegEdit.RetriveValue(lsKey, REG_VALUENAME_FTP_COMMAND_BTE)
-                    '   If Len(APP_FTP_COMMAND_BTE) = 0 Then lbTemp = False
-                    'Else
-                    '   lbTemp = False
-                End If
-
-                '-- FTP Command BTF
-                If cRegEdit.ValueExist(lsKey, REG_VALUENAME_FTP_COMMAND_BTF) Then
-                    APP_FTP_COMMAND_BTF = cRegEdit.RetriveValue(lsKey, REG_VALUENAME_FTP_COMMAND_BTF)
-                    '   If Len(APP_FTP_COMMAND_BTF) = 0 Then lbTemp = False
-                    'Else
-                    '   lbTemp = False
-                End If
-            End If
-
-            '2005-03-29 --->
             APP_FTP_COMMAND_BTE = ""
             APP_FTP_COMMAND_BTF = ""
-            '2005-03-29 <---
         Else
             '-- Skapa nyckel.
             cRegEdit.AddKey(lsKey)
@@ -1021,12 +1005,15 @@ EH:
 
     Private Sub lstLev_DblClick()
 
+        Dim sender As Object = Nothing
+        Dim e As EventArgs = Nothing
+
         If lstLev.SelectedItem Is Nothing Then
             MsgBox("Klicka på en leverantör i listan.", vbInformation, APPNAME)
             Exit Sub
         End If
 
-        mnuEditLeverantor_Click() 'Ändra på leverantören
+        mnuUpdateSupplier_Click(sender, e) 'Ändra på leverantören
 
     End Sub
 
@@ -1038,51 +1025,12 @@ EH:
     '-- Visar fönster med inställningar.
     '-- ====================================================================================
     Private Sub mnuConfig_Click()
-        'frmSettings.Show
+        'frmParameters.Show
     End Sub
 
     '-- ====================================================================================
     '-- Avsluta.
     '-- ====================================================================================
-    Private Sub cmdEnd_Click()
-        End
-    End Sub
-
-
-    Private Sub mnuAddLeverantor_Click()
-        cLev = New clsSupplier
-        If Not cLev.CreatePosts Then Exit Sub
-        frmLeverantor.Tag = "NEWLEV"
-        frmLeverantor.Show
-        Me.Hide()
-    End Sub
-
-    Private Sub mnuDeleteLeverantor_Click()
-        Dim lsLevFile As String
-
-        lsLevFile = lstLev.SelectedItem.Text
-
-        If Len(lsLevFile) = 0 Then
-            MsgBox("Markera den leverantör i listan som ska tas bort.", vbInformation, APPNAME)
-            Exit Sub
-        End If
-
-        If MsgBox("Är du säker på att du vill plocka bort leverantör " & lsLevFile & " ?", vbYesNo + vbQuestion, APPNAME) = vbNo Then
-            Exit Sub
-        End If
-
-        Kill(FixDirStr(APP_DIR_MALL) & lsLevFile)
-
-        MsgBox("Leverantören borttagen.", vbInformation)
-
-        UpdateListboxes()
-
-        Exit Sub
-
-EH:
-        MsgBox("Ett fel har inträffat." & vbCrLf & "Felbeskrivning :  " & Err.Description, vbInformation, APPNAME)
-
-    End Sub
 
 
     Private Sub mnuHelptext_Click()
@@ -1104,12 +1052,12 @@ EH:
         Else
             lsIntern = ""
         End If
-   
-   Set cLev = New clsSupplier
-   If Not cLev.CreatePosts(lsIntern) Then Exit Sub
-        frmVerifyFile.Tag = sTryggFile
-        frmVerifyFile.Tag = FixDirStr(APP_DIR_UTDATA) & sTryggFile
-        frmVerifyFile.Show
+
+        cLev = New clsSupplier
+        If Not cLev.CreatePosts(lsIntern) Then Exit Sub
+        FrmVerifyInfile.Tag = sTryggFile
+        FrmVerifyInfile.Tag = FixDirStr(APP_DIR_UTDATA) & sTryggFile
+        FrmVerifyInfile.Show()
 
         On Error GoTo 0
 
@@ -1118,23 +1066,6 @@ EH:
 EH:
         MsgBox("Ett fel har inträffat." & vbCrLf & "Felbeskrivning :  " & Err.Description, vbInformation, APPNAME)
         On Error GoTo 0
-
-    End Sub
-
-
-    Private Sub mnuEditLeverantor_Click()
-        On Error GoTo EH
-
-        If Not LoadIniFile() Then Exit Sub
-
-        frmLeverantor.Tag = "OLDLEV"
-        frmLeverantor.Show
-        Me.Hide()
-
-        Exit Sub
-
-EH:
-        MsgBox("Ett fel har inträffat." & vbCrLf & "Felbeskrivning :  " & Err.Description, vbInformation, APPNAME)
 
     End Sub
 
@@ -1193,9 +1124,9 @@ LoadInFileStart:
             cString.ResetValue()
         Next J
 
-        Close #Fnr
-   
-   bFileOpen = False
+        FileClose(Fnr)
+
+        bFileOpen = False
 
         cString = Nothing
 
@@ -1203,12 +1134,9 @@ LoadInFileStart:
 
 EH:
         LoadIniFile = False
-        If bFileOpen Then Close #Fnr
-   '-- Input pat eof
-   If Err.Number = 62 Then
-            '2005-03-29 --->
-            'MsgBox "Poster i FINFO-filen markerade som mall-fält är fler än i mall-filen." & vbCrLf & _
-            '      "Redigera FINFO-filen eller skapa en ny mall för leverantören.", vbInformation, APPNAME
+        If bFileOpen Then FileClose(Fnr)
+        '-- Input pat eof
+        If Err.Number = 62 Then
             s = "Det finns fler tillgängliga fält än vad det finns fält i mall-filen."
             s = s & vbCrLf
             s = s & "Ska mallfilen justeras så den passar antalet tillgängliga fält?"
@@ -1240,6 +1168,7 @@ EH:
         On Error GoTo EH
 
         VerifyInFile = True
+        lsArray = Split("", "")
 
         '-- Öppna infil för läsning.
         FnrIn = FreeFile()
@@ -1274,12 +1203,11 @@ EH:
 
             If bExc Then lsArray = Split(lsBuffer, vbTab)
 
-            '--->2009-06-01 Om det är en semikolonseparerad fil simulerar jag en excelfil. Excelfilen har tab som fältavskiljare
+            '--->Om det är en semikolonseparerad fil simulerar jag en excelfil. Excelfilen har tab som fältavskiljare
             If cLev.FileFormat = FILE_CSV Then
                 bExc = True
                 lsArray = Split(lsBuffer, ";")
             End If
-            '---<2009-06-01
 
             llRecord = llRecord + 1
 
@@ -1294,24 +1222,29 @@ EH:
 
                         b = False
                         If bExc Then
-                            '--->2010-11-08 kontrollerar att index är inom gränserna
                             If cLev.Post(MALL_POST(J)).StartPos >= UBound(lsArray) Then
                                 b = True
                             Else
-                                '---<2010-11-08
                                 cLev.Post(MALL_POST(J)).Value = Replace(Trim(lsArray(cLev.Post(MALL_POST(J)).StartPos - 1)), """", "")
-                            End If  '2010-11-08
+                            End If
                         Else
                             cLev.Post(MALL_POST(J)).Value = Trim(Mid(lsBuffer, cLev.Post(MALL_POST(J)).StartPos, cLev.Post(MALL_POST(J)).Length))
                         End If
 
-                        If b = False Then '2010-11-08
+                        If b = False Then
                             '-- Kontroll numeriskt fält.
                             If cLev.Post(MALL_POST(J)).FINFO_DataFormat = FORMAT_NUMERIC Then
 
-                                '=== 2004-05-07 ===
                                 '-- Blanka numeriska fält sätts till "0".
                                 If Len(Trim(cLev.Post(MALL_POST(J)).Value)) = 0 Then cLev.Post(MALL_POST(J)).Value = "0"
+
+                                'Försöker ta hand om decimaltecknet
+                                If Not IsNumeric(cLev.Post(MALL_POST(J)).Value) Then
+                                    cLev.Post(MALL_POST(J)).Value.Replace(",", ".")
+                                    If Not IsNumeric(cLev.Post(MALL_POST(J)).Value) Then
+                                        cLev.Post(MALL_POST(J)).Value.Replace(".", ",")
+                                    End If
+                                End If
 
                                 If Not IsNumeric(cLev.Post(MALL_POST(J)).Value) Then
                                     MsgBox(cLev.Post(MALL_POST(J)).FINFO_Description & " ska vara ett numeriskt värde." & vbCrLf &
@@ -1321,7 +1254,6 @@ EH:
                                     Exit Function
                                 End If
 
-                                '=== 2004-05-07 ===
                                 '-- Vid längdkontroll av numeriska fält, räkna inte med komma eller punkt.
                                 lsStrippedValue = Replace(cLev.Post(MALL_POST(J)).Value, ",", "")
                                 lsStrippedValue = Replace(lsStrippedValue, ".", "")
@@ -1350,16 +1282,11 @@ EH:
 
                             End If
 
-                            '--->2010-09-30 kontrollerar att index är inom gränserna
                         End If
-                        '---<2010-09-30
 
                     End If
 
                 Next J
-
-                '-- Slut nytt 2003-12-16
-                '-- ****************************************
             End If
 
         Loop
@@ -1408,6 +1335,8 @@ EH:
         bFilesIsOpen = False
         bExcel = False
         RecordCounter = 0
+        lsConvertedData = ""
+        lsData = ""
 
         '-- Om det är en excel-fil från leverantören sätts [bExcel] = TRUE.
         If cLev.FileFormat = FILE_EXCEL_ANSI Or cLev.FileFormat = FILE_EXCEL_DOS Then
@@ -1434,8 +1363,8 @@ EH:
 
         '--->2008-02-11, lagt in en räknare
         If lNoOfRecords > 0 Then
-            writeCounter True, lNoOfRecords
-   End If
+            writeCounter(True, lNoOfRecords)
+        End If
         '---<2008-02-11
 
         '-- Öppna infil för läsning.
@@ -1443,9 +1372,11 @@ EH:
         FileOpen(FnrIn, sInfil, OpenMode.Input)
 
         bFilesIsOpen = True
+        lsArray = Split("", "")
 
         Do Until EOF(FnrIn)
-            lsBuffer = LineInput(Fnr)
+
+            lsBuffer = LineInput(FnrIn)
 
             writeCounter()  '2008-02-11
             '-- Första raden ?
@@ -1454,8 +1385,8 @@ EH:
                 If cLev.Header > 0 Then
                     '-- Hoppa över de rader som innehåller kolumnrubriker.
                     For J = 1 To cLev.Header
-                        lsBuffer = LineInput(Fnr)
-                        writeCounter()  '2008-02-11
+                        lsBuffer = LineInput(FnrIn)
+                        writeCounter()
                     Next J
                     J = 0
                 End If
@@ -1500,7 +1431,7 @@ EH:
 
                                 '-- Decimaltecken saknas i posten, lägg till [FINFO_Decimals] nollor.
                                 If InStrRev(cLev.Post(J).Value, ".") = 0 And InStrRev(cLev.Post(J).Value, ",") = 0 Then
-                                    cLev.Post(J).Value = cLev.Post(J).Value & String(cLev.Post(J).FINFO_Decimals, "0")
+                                    cLev.Post(J).Value = cLev.Post(J).Value & New String("0", cLev.Post(J).FINFO_Decimals)
                                 Else
                                     '-- Sök efter punkt.
                                     llPos = InStrRev(cLev.Post(J).Value, ".")
@@ -1512,10 +1443,10 @@ EH:
 
                                     '-- Om för många decimaler är angivna, plocka bort. (ex, 2 dec. 25,500 --> 25,50)
                                     If llDecimals > cLev.Post(J).FINFO_Decimals Then
-                                        cLev.Post(J).Value = Left(cLev.Post(J).Value, Len(cLev.Post(J).Value) - (llDecimals - cLev.Post(J).FINFO_Decimals))
+                                        cLev.Post(J).Value = Strings.Left(cLev.Post(J).Value, Len(cLev.Post(J).Value) - (llDecimals - cLev.Post(J).FINFO_Decimals))
                                     Else
                                         '-- Fyll ut med nollor om ej tillräckligt med decimaler. (ex, 2 dec. 25,5 --> 25,50)
-                                        cLev.Post(J).Value = cLev.Post(J).Value & String(cLev.Post(J).FINFO_Decimals - llDecimals, "0")
+                                        cLev.Post(J).Value = cLev.Post(J).Value & New String("0", cLev.Post(J).FINFO_Decimals - llDecimals)
                                     End If
 
                                 End If
@@ -1534,14 +1465,14 @@ EH:
                             '--->2008-01-22, kontroll att längden inte blir mindre än 0
                             'cLev.Post(J).Value = String(CLng(cLev.Post(J).FINFO_Length) - Len(cLev.Post(J).Value), "0") & cLev.Post(J).Value
                             If (CLng(cLev.Post(J).FINFO_Length) - Len(cLev.Post(J).Value)) > 0 Then
-                                cLev.Post(J).Value = String(CLng(cLev.Post(J).FINFO_Length) - Len(cLev.Post(J).Value), "0") & cLev.Post(J).Value
+                                cLev.Post(J).Value = New String("0", CLng(cLev.Post(J).FINFO_Length) - Len(cLev.Post(J).Value)) & cLev.Post(J).Value
                             End If
                             '---<2008-01-22
 
                         Else
                             '-- Om textfält är för långt, trimma slutet så att längden blir maximalt tillåten.
                             If Len(cLev.Post(J).Value) > cLev.Post(J).FINFO_Length Then
-                                cLev.Post(J).Value = Left(cLev.Post(J).Value, cLev.Post(J).FINFO_Length)
+                                cLev.Post(J).Value = Strings.Left(cLev.Post(J).Value, cLev.Post(J).FINFO_Length)
                             End If
 
                             '-- Är det ett textfält, fyll ut med rätt antal blanka om längden understiger def. maxlängd. VS
@@ -1555,10 +1486,10 @@ EH:
                         '-- Är det ett textfält, fyll ut med rätt antal X. VS
                         If cLev.Post(J).FINFO_DataFormat = FORMAT_TEXT Then
                             'cLev.Post(J).Value = Space(cLev.Post(J).FINFO_Length)
-                            cLev.Post(J).Value = String(cLev.Post(J).FINFO_Length, "X")
+                            cLev.Post(J).Value = New String("X", cLev.Post(J).FINFO_Length)
                             '-- Numeriskt fält, fyll ut med nior.
                         Else
-                            cLev.Post(J).Value = String(cLev.Post(J).FINFO_Length, "9")
+                            cLev.Post(J).Value = New String("9", cLev.Post(J).FINFO_Length)
                         End If
 
                     End If
@@ -1575,32 +1506,27 @@ EH:
                     '-- Om infil = DOS, ingen åtgärd.
                 ElseIf cLev.FileFormat = FILE_DOS Or cLev.FileFormat = FILE_EXCEL_DOS Then
                     lsConvertedData = STLNRA & lsData
-                    '--->2009-06-01
                 ElseIf cLev.FileFormat = FILE_CSV Then
                     lsConvertedData = Space(lRecordLength)
                     RV = CharToOem(STLNRA & lsData, lsConvertedData)
-                    '--->2009-06-01
                 End If
 
 
                 '-- Skriv utdatarecord.
-                Print #FnrOut, lsConvertedData
-      lsData = ""
-
-                '-- Slut nytt 2003-12-16
-                '-- ****************************************
+                Print(FnrOut, lsConvertedData)
+                lsData = ""
             End If
 
-            DoEvents
+            Application.DoEvents()
 
         Loop
 
-        writeCounter , , True '2008-02-11
+        writeCounter(, , True)
 
-        Close #FnrIn
-   Close #FnrOut
-   
-   bFilesIsOpen = False
+        FileClose(FnrIn)
+        FileClose(FnrOut)
+
+        bFilesIsOpen = False
 
         UpdateListboxes()
 
@@ -1608,15 +1534,15 @@ EH:
 
 EH:
         If bFilesIsOpen Then
-            Close #FnrIn
-      Close #FnrOut
-   End If
+            FileClose(FnrIn)
+            FileClose(FnrOut)
+        End If
         CreateTryggFile = False
         UpdateListboxes()
-        MsgBox "Ett fel har inträffat." & vbCrLf & "Felbeskrivning :  " & Err.Description & vbCrLf &
-          "Filen " & sUtFil & " har skapats.", vbInformation, APPNAME
+        MsgBox("Ett fel har inträffat." & vbCrLf & "Felbeskrivning :  " & Err.Description & vbCrLf &
+          "Filen " & sUtFil & " har skapats.", vbInformation, APPNAME)
 
-End Function
+    End Function
 
     Private Sub makeMallRows(lNoOfRows As Long)
 
@@ -1627,72 +1553,61 @@ End Function
 
         On Error GoTo errorHandle
 
-        sLevFile = lstLev.List(lstLev.ListIndex)
+        sLevFile = lstLev.SelectedValue
 
         If Len(sLevFile) = 0 Then
             Exit Sub
         End If
 
-        '--->2013-01-23, flyttar den gamla mallen till den nya så att mallen hamnar på samma fält
-        If True Then
-            convertMall sLevFile
-    Else
-            '---<2013-01-23
-
-            lFileNo = FreeFile()
-            sLevFile = FixDirStr(APP_DIR_MALL) & sLevFile
-            Open sLevFile For Append As #lFileNo
-      For l = 1 To lNoOfRows
-                Print #lFileNo, "0|0|1"
-      Next l
-
-        End If '2013-01-23
+        convertMall(sLevFile)
 
 errorHandle:
-        Close #lFileNo
-    If Err.Description <> "" Then
+        FileClose(lFileNo)
+        If Err.Description <> "" Then
             MsgBox("Fel vid komplettering av mall! Felet är:" & vbCrLf & Err.Description)
         End If
         On Error GoTo 0
 
     End Sub
 
-    '--->2008-02-11, lagt in en räknare
     Public Sub writeCounter(Optional bInitiate As Boolean = False,
                             Optional lMaxRecords As Long = 0,
                             Optional bCloseCounter As Boolean = False)
 
         If bCloseCounter = True Then
-        Set oCounterPanel = Nothing
-        statusStrip.Items(1).
-        ProgressBar.Visible = False
-            lblCounter.Visible = False
+            progressBarElement.Value1 = 0
+            progressBarElement.Visibility = Telerik.WinControls.ElementVisibility.Hidden
+            txtProgressBar.Visibility = Telerik.WinControls.ElementVisibility.Hidden
         Else
             If bInitiate = True Then
-                lblCounter.Caption = ""
-                lblCounter.Visible = False
-                ProgressBar.Value = 0
-                ProgressBar.Min = 0
-                ProgressBar.Max = lMaxRecords
-                ProgressBar.Align = vbAlignBottom
-                'ProgressBar.Height = fMainForm.Controls("sbStatusBar").Height
-                ProgressBar.Visible = True
-            Set oCounterPanel = StatusBar.Panels(2)
-        Else
-                If Not oCounterPanel Is Nothing Then
-                    If ProgressBar.Value < ProgressBar.Max Then
-                        ProgressBar.Value = ProgressBar.Value + 1
-                        oCounterPanel.Text = ProgressBar.Value & "/" & ProgressBar.Max
-                        lblCounter.Caption = ProgressBar.Value & "/" & ProgressBar.Max
+                txtProgressBar.Text = ""
+                txtProgressBar.Visibility = Telerik.WinControls.ElementVisibility.Visible
+                progressBarElement.Value1 = 0
+                progressBarElement.Minimum = 0
+                progressBarElement.Maximum = lMaxRecords
+                txtProgressBar.Visibility = Telerik.WinControls.ElementVisibility.Visible
+            Else
+                If progressBarElement.Visibility = Telerik.WinControls.ElementVisibility.Visible Then
+                    If progressBarElement.Value1 < progressBarElement.Maximum Then
+                        progressBarElement.Value1 = progressBarElement.Value1 + 1
+                        txtProgressBar.Text = progressBarElement.Value1 & "/" & progressBarElement.Maximum
+                        Application.DoEvents()
                     End If
                 End If
             End If
         End If
 
     End Sub
-    '---<2008-02-11
 
+    Private Sub chkVerifiering_ToggleStateChanged(sender As Object, args As Telerik.WinControls.UI.StateChangedEventArgs) Handles chkVerifiering.ToggleStateChanged
 
+        If args.ToggleState = Telerik.WinControls.Enumerations.ToggleState.Off Then
+            cmdTransfer.Text = "Skapa fil till Trygg"
+        Else
+            cmdTransfer.Text = "Verifiera infilen"
+        End If
 
+    End Sub
 
 End Class
+
