@@ -95,6 +95,9 @@ Partial Class FrmSupplierTemplate
         '
         'grdFields
         '
+        Me.grdFields.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.grdFields.Location = New System.Drawing.Point(6, 22)
         '
         '
@@ -110,7 +113,7 @@ Partial Class FrmSupplierTemplate
         Me.cmdCancel.Location = New System.Drawing.Point(773, 405)
         Me.cmdCancel.Name = "cmdCancel"
         Me.cmdCancel.Size = New System.Drawing.Size(93, 24)
-        Me.cmdCancel.TabIndex = 4
+        Me.cmdCancel.TabIndex = 11
         Me.cmdCancel.Text = "&Avbryt"
         '
         'cmdSave
@@ -119,12 +122,13 @@ Partial Class FrmSupplierTemplate
         Me.cmdSave.Location = New System.Drawing.Point(674, 405)
         Me.cmdSave.Name = "cmdSave"
         Me.cmdSave.Size = New System.Drawing.Size(93, 24)
-        Me.cmdSave.TabIndex = 3
+        Me.cmdSave.TabIndex = 10
         Me.cmdSave.Text = "&Spara"
         '
         'RadGroupBox3
         '
         Me.RadGroupBox3.AccessibleRole = System.Windows.Forms.AccessibleRole.Grouping
+        Me.RadGroupBox3.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.RadGroupBox3.Controls.Add(Me.cmdHelp)
         Me.RadGroupBox3.Controls.Add(Me.lblPostTyp)
         Me.RadGroupBox3.Controls.Add(Me.RadLabel4)
@@ -146,7 +150,7 @@ Partial Class FrmSupplierTemplate
         Me.cmdHelp.Location = New System.Drawing.Point(179, 91)
         Me.cmdHelp.Name = "cmdHelp"
         Me.cmdHelp.Size = New System.Drawing.Size(18, 20)
-        Me.cmdHelp.TabIndex = 19
+        Me.cmdHelp.TabIndex = 9
         Me.cmdHelp.Text = "?"
         '
         'lblPostTyp
@@ -172,7 +176,7 @@ Partial Class FrmSupplierTemplate
         Me.txtDivider.Location = New System.Drawing.Point(117, 91)
         Me.txtDivider.Name = "txtDivider"
         Me.txtDivider.Size = New System.Drawing.Size(64, 20)
-        Me.txtDivider.TabIndex = 16
+        Me.txtDivider.TabIndex = 8
         '
         'lblDivider
         '
@@ -189,7 +193,7 @@ Partial Class FrmSupplierTemplate
         Me.txtPostLen.Location = New System.Drawing.Point(148, 68)
         Me.txtPostLen.Name = "txtPostLen"
         Me.txtPostLen.Size = New System.Drawing.Size(47, 20)
-        Me.txtPostLen.TabIndex = 14
+        Me.txtPostLen.TabIndex = 7
         '
         'txtStartPos
         '
@@ -198,7 +202,7 @@ Partial Class FrmSupplierTemplate
         Me.txtStartPos.Location = New System.Drawing.Point(148, 42)
         Me.txtStartPos.Name = "txtStartPos"
         Me.txtStartPos.Size = New System.Drawing.Size(47, 20)
-        Me.txtStartPos.TabIndex = 13
+        Me.txtStartPos.TabIndex = 6
         '
         'lblPostLen
         '
@@ -241,7 +245,7 @@ Partial Class FrmSupplierTemplate
         Me.cmbFilTyp.Location = New System.Drawing.Point(151, 69)
         Me.cmbFilTyp.Name = "cmbFilTyp"
         Me.cmbFilTyp.Size = New System.Drawing.Size(125, 20)
-        Me.cmbFilTyp.TabIndex = 13
+        Me.cmbFilTyp.TabIndex = 3
         Me.cmbFilTyp.Text = "RadDropDownList1"
         '
         'txtHeader
@@ -249,7 +253,7 @@ Partial Class FrmSupplierTemplate
         Me.txtHeader.Location = New System.Drawing.Point(151, 93)
         Me.txtHeader.Name = "txtHeader"
         Me.txtHeader.Size = New System.Drawing.Size(31, 20)
-        Me.txtHeader.TabIndex = 12
+        Me.txtHeader.TabIndex = 4
         '
         'RadLabel3
         '
@@ -272,7 +276,7 @@ Partial Class FrmSupplierTemplate
         Me.txtLevNr.Location = New System.Drawing.Point(151, 45)
         Me.txtLevNr.Name = "txtLevNr"
         Me.txtLevNr.Size = New System.Drawing.Size(100, 20)
-        Me.txtLevNr.TabIndex = 8
+        Me.txtLevNr.TabIndex = 2
         '
         'RadLabel2
         '
@@ -287,7 +291,7 @@ Partial Class FrmSupplierTemplate
         Me.txtLevNamn.Location = New System.Drawing.Point(151, 21)
         Me.txtLevNamn.Name = "txtLevNamn"
         Me.txtLevNamn.Size = New System.Drawing.Size(314, 20)
-        Me.txtLevNamn.TabIndex = 6
+        Me.txtLevNamn.TabIndex = 1
         '
         'RadLabel1
         '

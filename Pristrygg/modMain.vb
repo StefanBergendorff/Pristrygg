@@ -1,4 +1,6 @@
-﻿Module modMain
+﻿Imports Telerik.WinControls.UI
+
+Module modMain
     '2012-01-30 sbf Implementerar Vilma 2 som Vilma-fil
     '2013-01-23 sbf Konverterar mallar från Vilma1 till Vilma2 så de hamnar på rätt fält
     '2013-03-07 sbf Implementerar längden på BidCon fälten
@@ -42,6 +44,7 @@
     Public Const WINDOW_POS_KEY = "Fönsterposition"
     Public Const FRAME_POS_KEY = "Frameposition"
     Public Const GRID_LAYOUT = "GridLayout"
+    Public Const COLUMN_POS_KEY = "Columnwidth"
 
     '-- Sökvägar
     Public APP_DIR_INDATA As String
@@ -227,56 +230,65 @@
         Dim s As String
         Dim sOrg As String
         Dim ctl As Control
+        Dim ctlGroup As Control
         Dim sCtlType As String
+        Dim oGrid As RadGridView
+        Dim oColumn As GridViewDataColumn
 
-        On Error Resume Next
-        If frm Is Nothing Then
-            Exit Sub
-        End If
+        Try
 
-        '----------------------------------------------------------
-        ' Save:  If saving the preferences, save them and then
-        ' exit the subroutine.
-        '----------------------------------------------------------
-        s = APP_NAME & "\" & frm.Name
-        If sKeypart2 <> "" Then
-            s = s & "\" & sKeypart2
-        End If
-        s = s & "\" & WINDOW_POS_KEY & "\"
-        If sGetSave = "Save" Then
-            If frm.WindowState = FormWindowState.Minimized Then
-            ElseIf frm.WindowState = FormWindowState.Maximized Then
-                oWshShell.RegWrite(s & "Maximized", "1")
-            Else
-                oWshShell.RegWrite(s & "Maximized", "0")
-                oWshShell.RegWrite(s & "Left", frm.Left)
-                oWshShell.RegWrite(s & "Top", frm.Top)
-                oWshShell.RegWrite(s & "Width", frm.Width)
-                oWshShell.RegWrite(s & "Height", frm.Height)
+            If frm Is Nothing Then
+                Exit Sub
             End If
 
-            'Saves all frames too
-            sOrg = s
-            For Each ctl In frm.Controls
-                sCtlType = TypeName(ctl)
-                If sCtlType = "Frame" Then
-                    s = sOrg & ctl.Name & "\" & FRAME_POS_KEY & "\"
-                    oWshShell.RegWrite(s & "Left", ctl.Left)
-                    oWshShell.RegWrite(s & "Top", ctl.Top)
-                    oWshShell.RegWrite(s & "Width", ctl.Width)
-                    oWshShell.RegWrite(s & "Height", ctl.Height)
+            '----------------------------------------------------------
+            ' Save:  If saving the preferences, save them and then
+            ' exit the subroutine.
+            '----------------------------------------------------------
+            s = APP_NAME & "\" & frm.Name
+            If sKeypart2 <> "" Then
+                s = s & "\" & sKeypart2
+            End If
+            s = s & "\" & WINDOW_POS_KEY & "\"
+            If sGetSave = "Save" Then
+                If frm.WindowState = FormWindowState.Minimized Then
+                ElseIf frm.WindowState = FormWindowState.Maximized Then
+                    oWshShell.RegWrite(s & "Maximized", "1")
+                Else
+                    oWshShell.RegWrite(s & "Maximized", "0")
+                    oWshShell.RegWrite(s & "Left", frm.Left)
+                    oWshShell.RegWrite(s & "Top", frm.Top)
+                    oWshShell.RegWrite(s & "Width", frm.Width)
+                    oWshShell.RegWrite(s & "Height", frm.Height)
                 End If
-            Next ctl
 
-            On Error GoTo 0
-            Exit Sub
-        End If
+                'Saves all column with too
+                sOrg = s
+                For Each ctl In frm.Controls
+                    sCtlType = TypeName(ctl)
+                    If sCtlType = "RadGroupBox" Then
+                        For Each ctlGroup In ctl.Controls
+                            sCtlType = TypeName(ctlGroup)
+                            If sCtlType = "RadGridView" Then
+                                oGrid = ctlGroup
+                                'Save the columns width
+                                For Each oColumn In oGrid.Columns
+                                    s = sOrg & oGrid.Name & "_" & oColumn.Name & "\" & COLUMN_POS_KEY & "\"
+                                    oWshShell.RegWrite(s & "Width", oColumn.Width)
+                                Next
+                            End If
+                        Next
+                    End If
+                Next ctl
 
-        '----------------------------------------------------------
-        ' Get:  If no coordinates were saved, center the screen;
-        ' otherwise, get the last window position.
-        '----------------------------------------------------------
-        If oWshShell.RegRead(s & "Maximized") = String.Empty Then
+                Exit Try
+            End If
+
+            '----------------------------------------------------------
+            ' Get:  If no coordinates were saved, center the screen;
+            ' otherwise, get the last window position.
+            '----------------------------------------------------------
+            If oWshShell.RegRead(s & "Maximized") = String.Empty Then
         Else
             If oWshShell.RegRead(s & "Maximized") = "1" Then
                 frm.WindowState = FormWindowState.Maximized
@@ -284,13 +296,6 @@
         End If
 
         If IsNothing(oWshShell.RegRead(s & "Left")) Then
-
-            '        Move (Screen.Width - frm.Width) / 2, _
-            '            (Screen.Height - frm.Height) / 2
-            '        If frm.WindowState = vbMinimized Then
-            '        ElseIf frm.WindowState = FormWindowState.Maximized Then
-            '            oWshShell.RegWrite s & "Maximized", "1"
-            '        Else
 
         Else
             If frm.WindowState <> FormWindowState.Maximized Then
@@ -304,26 +309,29 @@
             sOrg = s
             For Each ctl In frm.Controls
                 sCtlType = TypeName(ctl)
-                If sCtlType = "Frame" Then
-                    If False Then            'OBS********* neutrilized
-                        s = sOrg & ctl.Name & "\" & FRAME_POS_KEY & "\"
-                        ctl.Left = oWshShell.RegRead(s & "Left")
-                        ctl.Top = oWshShell.RegRead(s & "Top")
-                        ctl.Width = oWshShell.RegRead(s & "Width")
-                        ctl.Height = oWshShell.RegRead(s & "Height")
-                    End If
-                    'Take some anyway
-                    If UCase(ctl.Name) = UCase("framedraw") Then
-                        s = sOrg & ctl.Name & "\" & FRAME_POS_KEY & "\"
-                        ctl.Left = oWshShell.RegRead(s & "Left")
-                    End If
+                If sCtlType = "RadGroupBox" Then
+                    For Each ctlGroup In ctl.Controls
+                        sCtlType = TypeName(ctlGroup)
+                        If sCtlType = "RadGridView" Then
+                            oGrid = ctlGroup
+                            'Get the columns
+                            For Each oColumn In oGrid.Columns
+                                s = sOrg & oGrid.Name & "_" & oColumn.Name & "\" & COLUMN_POS_KEY & "\"
+                                oColumn.Width = oWshShell.Regread(s & "Width")
+                            Next
+                            ctlGroup = oGrid
+                        End If
+                    Next
                 End If
             Next ctl
 
         End If
 
-        '    translateForm frm, lFrmTag, lGridTag
-        On Error GoTo 0
+
+        Catch ex As Exception
+            MsgBox("fel vid laddningen av fält. Felet är" & ex.Message)
+
+        End Try
 
     End Sub
 

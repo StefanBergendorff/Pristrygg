@@ -5,19 +5,25 @@ Public Class FrmSupplierTemplate
 
     Private bExcel As Boolean
     Private Counter As Long
+    Private lastRowIndex As Long
     Private lCounterSaved As Long
-    Private bINIT As Boolean
     Private cExcel As New clsExcelColumns
+    Private isNotLoading As Boolean
+    Private bErrorPending As Boolean
 
     Private Enum grdFieldsColumns
         fieldname = 0
         description
         mandatory
+        type
+        length
         active
+        chosenValue
+        divider
         originalIndex
     End Enum
 
-    Private Sub cmbFilTyp_Click(sender As Object, e As EventArgs) Handles cmbFilTyp.Click
+    Private Sub cmbFilTyp_SelectedIndexChanged(sender As Object, e As Data.PositionChangedEventArgs) Handles cmbFilTyp.SelectedIndexChanged
 
         If cmbFilTyp.Text = FILE_EXCEL_ANSI Or cmbFilTyp.Text = FILE_EXCEL_DOS Then
             bExcel = True
@@ -28,8 +34,23 @@ Public Class FrmSupplierTemplate
         If cmbFilTyp.Text = FILE_CSV Then 'Semikolon
             cLev.FileFormat = cmbFilTyp.Text
         End If
+        cLev.FileFormat = cmbFilTyp.Text
 
-        SetFields()
+        Select Case cmbFilTyp.Text
+            Case FILE_EXCEL_ANSI, FILE_EXCEL_DOS
+                lblPostLen.Visible = False
+                txtPostLen.Visible = False
+                lblStartPos.Text = "Kolumn (A - FX):"
+            Case FILE_CSV
+                lblPostLen.Visible = False
+                txtPostLen.Visible = False
+                lblStartPos.Text = "Fältnummer:"
+            Case FILE_ANSI, FILE_DOS
+                lblPostLen.Visible = True
+                lblPostLen.Text = "Postlängd :"
+                txtPostLen.Visible = True
+                lblStartPos.Text = "Startposition :"
+        End Select
 
     End Sub
 
@@ -45,6 +66,89 @@ Public Class FrmSupplierTemplate
         oFrm.Show()
 
         oFrm = Nothing
+
+    End Sub
+
+    Private Sub FrmSupplierTemplate_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
+        Dim i As Integer
+
+        If Len(Me.Tag) <> 0 Then
+
+            InitExcelArray()
+
+            cmbFilTyp.Items.Add(FILE_ANSI)
+            cmbFilTyp.Items.Add(FILE_DOS)
+            cmbFilTyp.Items.Add(FILE_EXCEL_ANSI)
+            cmbFilTyp.Items.Add(FILE_EXCEL_DOS)
+            cmbFilTyp.Items.Add(FILE_CSV)
+
+
+            '-- Ny leverantör, sätt defaultvärden.
+            If Me.Tag = "NEWLEV" Then
+                cmbFilTyp.SelectedItem = cmbFilTyp.Items(2)
+                cmbFilTyp.SelectedIndex = 2
+                cmbFilTyp.Text = cmbFilTyp.Items(2).Text
+                txtHeader.Text = "0"
+
+                '-- Befintlig leverantör, läs från objektet.
+            ElseIf Me.Tag = "OLDLEV" Then
+                txtLevNamn.Text = cLev.LevNamn
+                txtLevNr.Text = cLev.LevNr
+                If cLev.FileFormat = FILE_CSV Then
+                    cmbFilTyp.Text = cLev.FileFormat
+                Else
+                    cmbFilTyp.Text = UCase(cLev.FileFormat)
+                End If
+
+                'Set index in filetype
+                For i = 0 To cmbFilTyp.Items.Count - 1
+                    If cmbFilTyp.Items(i).Text = cmbFilTyp.Text Then
+                        cmbFilTyp.SelectedItem = cmbFilTyp.Items(i)
+                        cmbFilTyp.SelectedIndex = i
+                        Exit For
+                    End If
+                Next
+
+                txtHeader.Text = cLev.Header
+
+                If UCase(cLev.FileFormat) = FILE_EXCEL_ANSI Or UCase(cLev.FileFormat) = FILE_EXCEL_DOS Then
+                    bExcel = True
+                Else
+                    bExcel = False
+                End If
+
+            End If
+
+            Counter = 1
+            lastRowIndex = -1
+            SetFields()
+            InitializeGrid()
+            InitListBox()
+
+            'getWindowPlace()
+            GetSaveWindowsPreferences("Get", Me)
+        End If
+
+        Me.Tag = ""
+        Counter = 1
+        isNotLoading = True
+
+    End Sub
+
+    Private Sub FrmSupplierTemplate_Resize(sender As Object, e As EventArgs) Handles Me.Resize
+
+        Dim lW As Long
+        Dim lH As Long
+        Dim dblFactorW As Double
+        Dim dblFactorH As Double
+
+        lW = System.Math.Abs(Me.Width - 100)
+        lH = System.Math.Abs(Me.Height - 100)
+        dblFactorW = 0.95
+        dblFactorH = 0.95
+
+        grdFields.Height = System.Math.Abs(fraPost.Height * (dblFactorH))
 
     End Sub
 
@@ -137,11 +241,11 @@ Public Class FrmSupplierTemplate
         bFileOpen = True
 
         '-- Header
-        Print(Fnr, cLev.LevNamn & "|" & cLev.LevNr & "|" & cLev.FileFormat & "|" & cLev.Header)
+        PrintLine(Fnr, cLev.LevNamn & "|" & cLev.LevNr & "|" & cLev.FileFormat & "|" & cLev.Header)
 
         '-- Går igenom alla poster som är markerade som mall-poster i Finfo.ini
         For J = 1 To cLev.NumberOfTemplatePosts
-            Print(Fnr, cLev.Post(MALL_POST(J)).StartPos & "|" & cLev.Post(MALL_POST(J)).Length & "|" & cLev.Post(MALL_POST(J)).Divider)
+            PrintLine(Fnr, cLev.Post(MALL_POST(J)).StartPos & "|" & cLev.Post(MALL_POST(J)).Length & "|" & cLev.Post(MALL_POST(J)).Divider)
         Next J
 
         FileClose(Fnr)
@@ -161,238 +265,219 @@ EH:
         MsgBox("Ett fel har inträffat." & vbCrLf & "Felbeskrivning :  " & Err.Description, vbInformation, APPNAME)
 
     End Sub
-
-    Private Sub FrmSupplierTemplate_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-
-        'getWindowPlace()
-        GetSaveWindowsPreferences("Get", Me)
-
-
-        If Len(Me.Tag) <> 0 Then
-
-            InitExcelArray()
-
-            cmbFilTyp.Items.Add(FILE_ANSI)
-            cmbFilTyp.Items.Add(FILE_DOS)
-            cmbFilTyp.Items.Add(FILE_EXCEL_ANSI)
-            cmbFilTyp.Items.Add(FILE_EXCEL_DOS)
-            cmbFilTyp.Items.Add(FILE_CSV)
-
-            '-- Ny leverantör, sätt defaultvärden.
-            If Me.Tag = "NEWLEV" Then
-                cmbFilTyp.Text = FILE_ANSI
-                txtHeader.Text = "0"
-
-                '-- Befintlig leverantör, läs från objektet.
-            ElseIf Me.Tag = "OLDLEV" Then
-                txtLevNamn.Text = cLev.LevNamn
-                txtLevNr.Text = cLev.LevNr
-                If cLev.FileFormat = FILE_CSV Then
-                    cmbFilTyp.Text = cLev.FileFormat
-                Else
-                    cmbFilTyp.Text = UCase(cLev.FileFormat)
-                End If
-                txtHeader.Text = cLev.Header
-
-                If UCase(cLev.FileFormat) = FILE_EXCEL_ANSI Or UCase(cLev.FileFormat) = FILE_EXCEL_DOS Then
-                    bExcel = True
-                Else
-                    bExcel = False
-                End If
-
-            End If
-
-            Counter = 1
-            SetFields()
-            InitializeGrid()
-            InitListBox()
-        End If
-
-        Me.Tag = ""
-
-        bINIT = True
-
-    End Sub
-
-    Private Sub FrmSupplierTemplate_Resize(sender As Object, e As EventArgs) Handles Me.Resize
-
-        Dim lW As Long
-        Dim lH As Long
-        Dim dblFactorW As Double
-        Dim dblFactorH As Double
-
-        lW = System.Math.Abs(Me.Width - 100)
-        lH = System.Math.Abs(Me.Height - 100)
-        dblFactorW = 0.95
-        dblFactorH = 0.95
-
-        grdFields.Height = System.Math.Abs(fraPost.Height * (dblFactorH))
-
-    End Sub
     '---<2012-03-28
 
     Private Sub SetFields()
+        Dim s As String
 
-        If cLev.NumberOfTemplatePosts = 0 Then
-            MsgBox("Inga fält är markerade i filen " & INI_FILE, vbInformation, APPNAME)
-            Me.Close()
-            Exit Sub
-        End If
-
-        txtPostLen.Text = cLev.Post(MALL_POST(Counter)).Length
-        txtDivider.Text = cLev.Post(MALL_POST(Counter)).Divider
-
-        If cLev.Post(MALL_POST(Counter)).FINFO_DataFormat = FORMAT_TEXT Then
-            lblPostTyp.text = cLev.Post(MALL_POST(Counter)).FINFO_DataFormat
-            txtDivider.Visible = False
-            lblDivider.Visible = False
-            cmdHelp.Visible = False
-        Else
-            '-- Visa antalet decimaler om det är tal.
-            lblPostTyp.text = cLev.Post(MALL_POST(Counter)).FINFO_DataFormat & "  (" & cLev.Post(MALL_POST(Counter)).FINFO_Decimals & " decimaler)"
-            txtDivider.Visible = True
-            lblDivider.Visible = True
-            cmdHelp.Visible = True
-        End If
-
-        If bExcel Then
-            If cLev.Post(MALL_POST(Counter)).StartPos > 0 Then '/*
-                'txtStartPos.Text = Chr(CInt(cLev.Post(MALL_POST(Counter)).StartPos) + 64)
-                txtStartPos.Text = cExcel.ReplaceDigitWithLetter(CInt(cLev.Post(MALL_POST(Counter)).StartPos))
-            Else
-                txtStartPos.Text = ""
-            End If '*/
-            lblPostLen.Text = ""
-            txtPostLen.Visible = False
-            lblStartPos.Text = "Kolumn (A - FX):"
-            '--->2009-06-01
-        ElseIf cLev.FileFormat = FILE_CSV Then 'Semikolon
-            If cLev.Post(MALL_POST(Counter)).StartPos > 0 Then
-                txtStartPos.Text = cLev.Post(MALL_POST(Counter)).StartPos
-            Else
-                txtStartPos.Text = ""
+        Try
+            If cLev.NumberOfTemplatePosts = 0 Then
+                MsgBox("Inga fält är markerade i filen " & INI_FILE, vbInformation, APPNAME)
+                Me.Close()
+                Exit Sub
             End If
-            lblPostLen.Text = ""
-            txtPostLen.Visible = False
-            lblStartPos.Text = "Fältnummer:"
-            '---<2009-06-01
-        Else
-            txtStartPos.Text = cLev.Post(MALL_POST(Counter)).StartPos
-            lblPostLen.Text = "Postlängd :"
-            txtPostLen.Visible = True
-            lblStartPos.Text = "Startposition :"
-        End If
+
+            txtPostLen.Text = cLev.Post(MALL_POST(Counter)).Length
+            If cLev.Post(MALL_POST(Counter)).Divider <> 0 Then
+                txtDivider.Text = cLev.Post(MALL_POST(Counter)).Divider
+            End If
+            If cLev.Post(MALL_POST(Counter)).FINFO_DataFormat = FORMAT_TEXT Then
+                lblPostTyp.Text = cLev.Post(MALL_POST(Counter)).FINFO_DataFormat
+                txtDivider.Visible = False
+                lblDivider.Visible = False
+                cmdHelp.Visible = False
+            Else
+                '-- Visa antalet decimaler om det är tal.
+                lblPostTyp.Text = cLev.Post(MALL_POST(Counter)).FINFO_DataFormat & "  (" & cLev.Post(MALL_POST(Counter)).FINFO_Decimals & " decimaler)"
+                txtDivider.Visible = True
+                lblDivider.Visible = True
+                cmdHelp.Visible = True
+            End If
+
+            If bExcel Then
+                If cLev.Post(MALL_POST(Counter)).StartPos > 0 Then '/*
+                    '        'txtStartPos.Text = Chr(CInt(cLev.Post(MALL_POST(Counter)).StartPos) + 64)
+                    txtStartPos.Text = cExcel.ReplaceDigitWithLetter(CInt(cLev.Post(MALL_POST(Counter)).StartPos))
+                Else
+                    txtStartPos.Text = ""
+                End If '*/
+                'lblPostLen.Text = ""
+                '    txtPostLen.Visible = False
+                '    lblStartPos.Text = "Kolumn (A - FX):"
+                '    '--->2009-06-01
+            ElseIf cLev.FileFormat = FILE_CSV Then 'Semikolon
+                    If cLev.Post(MALL_POST(Counter)).StartPos > 0 Then
+                        txtStartPos.Text = cLev.Post(MALL_POST(Counter)).StartPos
+                    Else
+                        txtStartPos.Text = ""
+                    End If
+                    '    lblPostLen.Text = ""
+                    '    txtPostLen.Visible = False
+                    '    lblStartPos.Text = "Fältnummer:"
+                    '    '---<2009-06-01
+                Else
+                If cLev.Post(MALL_POST(Counter)).StartPos > 0 Then
+                    txtStartPos.Text = cLev.Post(MALL_POST(Counter)).StartPos
+                Else
+                    txtStartPos.Text = ""
+                End If
+                '    lblPostLen.Text = "Postlängd :"
+                '    txtPostLen.Visible = True
+                '    lblStartPos.Text = "Startposition :"
+            End If
+
+        Catch ex As Exception
+            s = "Fel när raden hämtades!"
+            s = s & vbCrLf
+            s = s & "Felet är " & ex.Message
+            MsgBox(s, vbExclamation, APPNAME)
+
+        End Try
 
     End Sub
 
     Private Function VerifyFields() As String
 
         Dim llStartPos As Long
+        Dim s As String
         'Const lcLetters As String = "ABCDEFGHIJKLMNOPQRSTUVXYZ"
 
-        VerifyFields = ""
+        Try
+            VerifyFields = ""
 
-        If bExcel Then
-            '-- Endast verifiera om kolumn är ifylld.
-            If txtStartPos.Text <> "" Then
-                '-- Räkna om kolumnbokstav till motsvarande nummer.
-                llStartPos = cExcel.ReplaceLetterWithDigit(UCase(txtStartPos.Text))
-                If llStartPos = 0 Then
-                    VerifyFields = "Ej giltig excelkolumn."
-                    txtStartPos.Focus()
-                    Exit Function
-                End If
-            End If
-        Else
-            If Trim(txtStartPos.Text) = "" Then
-                txtStartPos.Text = 0
-            End If
-            If Not IsNumeric(txtStartPos.Text) Then
-                VerifyFields = "Kolumn ska vara numerisk."
-                txtStartPos.Focus()
-                Exit Function
-            End If
-        End If
-
-        If Not bExcel Then
-            '--->2009-06-01
-            If cLev.FileFormat = FILE_CSV Then 'Semikolon
-                If IsNumeric(txtStartPos.Text) = False Then
-                    VerifyFields = "Fältet ska vara numerisk."
-                    txtStartPos.Focus()
-                    Exit Function
+            If bExcel Then
+                '-- Endast verifiera om kolumn är ifylld.
+                If txtStartPos.Text <> "" Then
+                    '-- Räkna om kolumnbokstav till motsvarande nummer.
+                    llStartPos = cExcel.ReplaceLetterWithDigit(UCase(txtStartPos.Text))
+                    If llStartPos = 0 Then
+                        VerifyFields = "Ej giltig excelkolumn."
+                        txtStartPos.Focus()
+                        Exit Function
+                    End If
                 End If
             Else
-                '---<2009-06-01
-                If Not IsNumeric(txtPostLen.Text) Then
-                    VerifyFields = "Postlängd ska vara numerisk."
-                    txtPostLen.Focus()
+                If Trim(txtStartPos.Text) = "" Then
+                    txtStartPos.Text = 0
+                End If
+                If Not IsNumeric(txtStartPos.Text) Then
+                    VerifyFields = "Kolumn ska vara numerisk."
+                    txtStartPos.Focus()
                     Exit Function
                 End If
-
-                If CLng(txtPostLen.Text) > cLev.Post(MALL_POST(Counter)).FINFO_Length And CLng(txtStartPos.Text) <> 0 Then
-                    VerifyFields = cLev.Post(MALL_POST(Counter)).FINFO_Description & " får ha en postlängd på max " & cLev.Post(MALL_POST(Counter)).FINFO_Length
-                    txtPostLen.Focus()
-                    Exit Function
-                End If
-
-                If CLng(txtStartPos.Text) <> 0 And CLng(txtPostLen.Text) = 0 Then
-                    VerifyFields = "Postlängd måste anges om startposition är skild från noll."
-                    txtPostLen.Focus()
-                    Exit Function
-                End If
-            End If  '2009-06-01
-        End If
-
-        '=== 2004-05-07 ===
-        If txtDivider.Visible Then
-            If txtDivider.Text <> "1" And
-                txtDivider.Text <> "10" And
-                txtDivider.Text <> "100" And
-                txtDivider.Text <> "1000" And
-                txtDivider.Text <> "-1" And
-                txtDivider.Text <> "0,1" And
-                txtDivider.Text <> "0,01" And
-                txtDivider.Text <> "0,001" Then
-                'VerifyFields = "Fältet 'Omräkningstal' ska innehålla -1, 1, 10, 100 eller 1000" & vbCrLf
-                VerifyFields = "Omräkningstal felaktigt" & vbCrLf &
-         "Klicka på hjälpknappen vid fältet för mer information."
-                txtDivider.Focus()
-                Exit Function
             End If
-        End If
-        '=== /2004-05-07 ===
+
+            If Not bExcel Then
+                '--->2009-06-01
+                If cLev.FileFormat = FILE_CSV Then 'Semikolon
+                    If IsNumeric(txtStartPos.Text) = False Then
+                        VerifyFields = "Fältet ska vara numerisk."
+                        txtStartPos.Focus()
+                        Exit Function
+                    End If
+                Else
+                    If Not IsNumeric(txtPostLen.Text) Then
+                        VerifyFields = "Postlängd ska vara numerisk."
+                        txtPostLen.Focus()
+                        Exit Function
+                    End If
+
+                    If CLng(txtPostLen.Text) > cLev.Post(MALL_POST(Counter)).FINFO_Length And CLng(txtStartPos.Text) <> 0 Then
+                        VerifyFields = cLev.Post(MALL_POST(Counter)).FINFO_Description & " får ha en postlängd på max " & cLev.Post(MALL_POST(Counter)).FINFO_Length
+                        txtPostLen.Focus()
+                        Exit Function
+                    End If
+
+                    If CLng(txtStartPos.Text) <> 0 And CLng(txtPostLen.Text) = 0 Then
+                        VerifyFields = "Postlängd måste anges om startposition är skild från noll."
+                        txtPostLen.Focus()
+                        Exit Function
+                    End If
+                End If
+            End If
+
+            If txtDivider.Visible Then
+                If Trim(txtStartPos.Text) <> "" And
+                    Trim(txtStartPos.Text) <> "0" And
+                    txtDivider.Text <> "1" And
+                    txtDivider.Text <> "10" And
+                    txtDivider.Text <> "100" And
+                    txtDivider.Text <> "1000" And
+                    txtDivider.Text <> "-1" And
+                    txtDivider.Text <> "0,1" And
+                    txtDivider.Text <> "0,01" And
+                    txtDivider.Text <> "0,001" Then
+                    'VerifyFields = "Fältet 'Omräkningstal' ska innehålla -1, 1, 10, 100 eller 1000" & vbCrLf
+                    VerifyFields = "Omräkningstal felaktigt" & vbCrLf & "Klicka på hjälpknappen vid fältet för mer information."
+                    txtDivider.Focus()
+                    Exit Function
+                End If
+            End If
+
+        Catch ex As Exception
+            s = "Fel när raden verifierades!"
+            s = s & vbCrLf
+            s = s & "Felet är " & ex.Message
+            MsgBox(s, vbExclamation, APPNAME)
+            Return ""
+        End Try
 
     End Function
 
     Public Sub SaveFields()
+        Dim s As String
+        Dim i As Integer
 
-        '-- Spara värden till klass innan nästa post.
-        If bExcel Then
-            If txtStartPos.Text = "" Then
-                cLev.Post(MALL_POST(Counter)).StartPos = "0"
-                grdFields.Rows(Counter - 1).Cells(grdFieldsColumns.active).Value = ""
+        Try
+            '-- Spara värden till klass innan nästa post.
+            If bExcel Then
+                If txtStartPos.Text = "" Or txtStartPos.Text = "0" Then
+                    cLev.Post(MALL_POST(Counter)).StartPos = "0"
+                    grdFields.Rows(Counter - 1).Cells(grdFieldsColumns.active).Value = ""
+                    grdFields.Rows(Counter - 1).Cells(grdFieldsColumns.chosenValue).Value = ""
+                    grdFields.Rows(Counter - 1).Cells(grdFieldsColumns.divider).Value = ""
+                Else
+                    '-- Räkna om kolumnbokstav till motsvarande nummer.
+                    'cLev.Post(MALL_POST(Counter)).StartPos = Asc(UCase(txtStartPos.Text)) - 64
+                    cLev.Post(MALL_POST(Counter)).StartPos = cExcel.ReplaceLetterWithDigit(UCase(txtStartPos.Text))
+                    grdFields.Rows(Counter - 1).Cells(grdFieldsColumns.active).Value = "Ja"
+                    grdFields.Rows(Counter - 1).Cells(grdFieldsColumns.chosenValue).Value = UCase(txtStartPos.Text)
+                    grdFields.Rows(Counter - 1).Cells(grdFieldsColumns.divider).Value = txtDivider.Text
+                End If
+
             Else
-                '-- Räkna om kolumnbokstav till motsvarande nummer.
-                'cLev.Post(MALL_POST(Counter)).StartPos = Asc(UCase(txtStartPos.Text)) - 64
-                cLev.Post(MALL_POST(Counter)).StartPos = cExcel.ReplaceLetterWithDigit(UCase(txtStartPos.Text))
-                grdFields.Rows(Counter - 1).Cells(grdFieldsColumns.active).Value = "Ja"
+                If txtStartPos.Text = "" Or txtStartPos.Text = "0" Then
+                    cLev.Post(MALL_POST(Counter)).StartPos = "0"
+                    grdFields.Rows(Counter - 1).Cells(grdFieldsColumns.active).Value = ""
+                    grdFields.Rows(Counter - 1).Cells(grdFieldsColumns.chosenValue).Value = ""
+                    grdFields.Rows(Counter - 1).Cells(grdFieldsColumns.divider).Value = ""
+                Else
+                    cLev.Post(MALL_POST(Counter)).StartPos = GetValue(txtStartPos.Text, True)
+                    grdFields.Rows(Counter - 1).Cells(grdFieldsColumns.active).Value = "Ja"
+                    If cLev.FileFormat = FILE_CSV Then 'Semikolon
+                        grdFields.Rows(Counter - 1).Cells(grdFieldsColumns.chosenValue).Value = txtStartPos.Text
+                    Else
+                        i = CInt(txtStartPos.Text) + CInt(txtPostLen.Text) - 1
+                        grdFields.Rows(Counter - 1).Cells(grdFieldsColumns.chosenValue).Value = GetValue(txtStartPos.Text, True) & " - " & i
+                    End If
+                    grdFields.Rows(Counter - 1).Cells(grdFieldsColumns.divider).Value = txtDivider.Text
+                End If
             End If
 
-        ElseIf cLev.FileFormat = FILE_CSV Then 'Semikolon
-            If txtStartPos.Text = "" Then
-                cLev.Post(MALL_POST(Counter)).StartPos = "0"
-                grdFields.Rows(Counter - 1).Cells(grdFieldsColumns.active).Value = ""
+            cLev.Post(MALL_POST(Counter)).Length = txtPostLen.Text
+            If txtDivider.Text = "" Or txtDivider.Visible = False Then
+                cLev.Post(MALL_POST(Counter)).Divider = 0
             Else
-                cLev.Post(MALL_POST(Counter)).StartPos = GetValue(txtStartPos.Text, True)
-                grdFields.Rows(Counter - 1).Cells(grdFieldsColumns.active).Value = "Ja"
+                cLev.Post(MALL_POST(Counter)).Divider = txtDivider.Text
             End If
 
-        Else
-            cLev.Post(MALL_POST(Counter)).StartPos = txtStartPos.Text
-        End If
-        cLev.Post(MALL_POST(Counter)).Length = txtPostLen.Text
-        cLev.Post(MALL_POST(Counter)).Divider = txtDivider.Text
+        Catch ex As Exception
+            s = "Fel när raden sparades!"
+            s = s & vbCrLf
+            s = s & "Felet är " & ex.Message
+            MsgBox(s, vbExclamation, APPNAME)
+
+        End Try
 
     End Sub
 
@@ -408,12 +493,30 @@ EH:
                 rowInfo.Cells(grdFieldsColumns.fieldname).Value = cLev.Post(MALL_POST(j)).FINFO_Name
                 rowInfo.Cells(grdFieldsColumns.description).Value = cLev.Post(MALL_POST(j)).FINFO_Description.Substring(0, Len(cLev.Post(MALL_POST(j)).FINFO_Description) - 1)
                 If cLev.Post(MALL_POST(j)).FINFO_Description.Substring(Len(cLev.Post(MALL_POST(j)).FINFO_Description) - 1, 1) = "*" Then
-                    rowInfo.Cells(grdFieldsColumns.mandatory).Value = "*"
+                    rowInfo.Cells(grdFieldsColumns.mandatory).Value = "Ja"
+                End If
+                rowInfo.Cells(grdFieldsColumns.type).Value = cLev.Post(MALL_POST(j)).FINFO_DataFormat
+                If cLev.Post(MALL_POST(j)).FINFO_DataFormat = "Tal" Then
+                    rowInfo.Cells(grdFieldsColumns.length).Value = cLev.Post(MALL_POST(j)).FINFO_Length & "," & cLev.Post(MALL_POST(j)).FINFO_Decimals
+                Else
+                    rowInfo.Cells(grdFieldsColumns.length).Value = cLev.Post(MALL_POST(j)).FINFO_Length
                 End If
                 If cLev.Post(MALL_POST(j)).StartPos <> 0 Then
                     rowInfo.Cells(grdFieldsColumns.active).Value = "Ja"
+                    If InStr(cLev.FileFormat, "EXCEL") > 0 Then
+                        rowInfo.Cells(grdFieldsColumns.chosenValue).Value = cExcel.ReplaceDigitWithLetter(cLev.Post(MALL_POST(j)).StartPos)
+                    Else
+                        rowInfo.Cells(grdFieldsColumns.chosenValue).Value = cLev.Post(MALL_POST(j)).StartPos & " - " & cLev.Post(MALL_POST(j)).StartPos + cLev.Post(MALL_POST(j)).Length - 1
+                    End If
+                    If cLev.Post(MALL_POST(j)).Divider <> 0 Then
+                        rowInfo.Cells(grdFieldsColumns.divider).Value = cLev.Post(MALL_POST(j)).Divider
+                    Else
+                        rowInfo.Cells(grdFieldsColumns.divider).Value = ""
+                    End If
                 Else
-                    rowInfo.Cells(grdFieldsColumns.active).Value = ""
+                        rowInfo.Cells(grdFieldsColumns.active).Value = ""
+                    rowInfo.Cells(grdFieldsColumns.chosenValue).Value = ""
+                    rowInfo.Cells(grdFieldsColumns.divider).Value = ""
                 End If
                 rowInfo.Cells(grdFieldsColumns.originalIndex).Value = j
             Next
@@ -429,76 +532,6 @@ EH:
 
     End Sub
 
-    Private Sub List1_Click()
-
-        'Static bFlag As Boolean
-        'Dim lsMsg As String
-
-        'If bFlag Or Counter = List1.ItemData(List1.ListIndex) Then
-        '    bFlag = False
-        '    Exit Sub
-        'End If
-
-        ''-- Verifiera fält.
-        'lsMsg = VerifyFields()
-
-        'If lsMsg <> "" Then
-        '    bFlag = True
-        '    List1.Selected(List1.ListIndex) = True
-        '    MsgBox lsMsg, vbInformation, APPNAME
-        'Exit Sub
-        'End If
-
-        ''-- Spara värden till klass innan nästa post.
-        'Call SaveFields()
-        'Counter = List1.ItemData(List1.ListIndex)
-
-        'SetFields()
-
-    End Sub
-
-    'Private Sub List2_Click()
-
-    '    Static bFlag As Boolean
-    '    Dim lsMsg As String
-
-    '    If bFlag Or Counter = List2.ListIndex + 1 Then
-    '        bFlag = False
-    '        Exit Sub
-    '    End If
-
-    '    '-- Verifiera fält.
-    '    lsMsg = VerifyFields()
-
-    '    If lsMsg <> "" Then
-    '        bFlag = True
-    '        List2.Selected(Counter - 1) = True
-    '        MsgBox lsMsg, vbInformation, APPNAME
-    '    Exit Sub
-    '    End If
-
-    '    '-- Spara värden till klass innan nästa post.
-    '    Call SaveFields()
-    '    Counter = List2.ListIndex + 1
-
-    '    SetFields()
-
-    'End Sub
-
-    'Private Sub List2_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As Single)
-
-    '    Dim lRad As Long
-    '    Dim dblFactor As Double
-
-    '    dblFactor = Abs(List2.Height) / 17
-    '    If Button = vbRightButton Then
-    '        lRad = Int(Y / dblFactor) + 1
-    '        'MsgBox ("x=" & X & " y=" & Y & " rad=" & lRad
-
-    '    End If
-
-    'End Sub
-
     Private Sub InitExcelArray()
 
         cExcel.InitArray()
@@ -508,13 +541,8 @@ EH:
     'Sätter plats och storlek på fönstret
     Public Sub setWindowPlace()
 
-        Me.Left = GetSetting(Me.Name, "WindowSettings", "Left", -60)
-        Me.Top = GetSetting(Me.Name, "WindowSettings", "Top", -105)
-        Me.Width = GetSetting(Me.Name, "WindowSettings", "Width", 10680)
-        Me.Height = GetSetting(Me.Name, "WindowSettings", "Height", 8595)
-        If GetValue(GetSetting(Me.Name, "WindowSettings", "State", Me.WindowState), True) = FormWindowState.Maximized Then
-            Me.WindowState = FormWindowState.Maximized
-        End If
+        GetSaveWindowsPreferences("Get", Me)
+        Exit Sub
 
     End Sub
     Private Sub InitializeGrid()
@@ -575,6 +603,26 @@ EH:
             newColumn.AutoSizeMode = BestFitColumnMode.AllCells
             grdFields.Columns.Add(newColumn)
 
+            'The type of field
+            newColumn = New GridViewTextBoxColumn()
+            newColumn.FieldName = "Type"
+            newColumn.ReadOnly = True
+            newColumn.TextAlignment = ContentAlignment.MiddleCenter
+            newColumn.HeaderText = "Typ"
+            newColumn.HeaderTextAlignment = ContentAlignment.MiddleCenter
+            newColumn.AutoSizeMode = BestFitColumnMode.AllCells
+            grdFields.Columns.Add(newColumn)
+
+            'Length of field
+            newColumn = New GridViewTextBoxColumn()
+            newColumn.FieldName = "length"
+            newColumn.ReadOnly = True
+            newColumn.TextAlignment = ContentAlignment.MiddleCenter
+            newColumn.HeaderText = "Längd"
+            newColumn.HeaderTextAlignment = ContentAlignment.MiddleCenter
+            newColumn.AutoSizeMode = BestFitColumnMode.AllCells
+            grdFields.Columns.Add(newColumn)
+
             'Field is chosen
             newColumn = New GridViewTextBoxColumn()
             newColumn.FieldName = "active"
@@ -585,7 +633,27 @@ EH:
             newColumn.AutoSizeMode = BestFitColumnMode.AllCells
             grdFields.Columns.Add(newColumn)
 
-            'Index för att hitta tillbaka till tabellen clev
+            'Chosen value
+            newColumn = New GridViewTextBoxColumn()
+            newColumn.FieldName = "chosenValue"
+            newColumn.ReadOnly = True
+            newColumn.TextAlignment = ContentAlignment.MiddleCenter
+            newColumn.HeaderText = "Valt värde"
+            newColumn.HeaderTextAlignment = ContentAlignment.MiddleCenter
+            newColumn.AutoSizeMode = BestFitColumnMode.AllCells
+            grdFields.Columns.Add(newColumn)
+
+            'Factor for number values
+            newColumn = New GridViewTextBoxColumn()
+            newColumn.FieldName = "divider"
+            newColumn.ReadOnly = True
+            newColumn.TextAlignment = ContentAlignment.MiddleCenter
+            newColumn.HeaderText = "Omräkning"
+            newColumn.HeaderTextAlignment = ContentAlignment.MiddleCenter
+            newColumn.AutoSizeMode = BestFitColumnMode.AllCells
+            grdFields.Columns.Add(newColumn)
+
+            'Index to find row in table clev
             newColumn = New GridViewTextBoxColumn()
             newColumn.FieldName = "originalIndex"
             newColumn.ReadOnly = True
@@ -593,6 +661,7 @@ EH:
             newColumn.HeaderText = "Original"
             newColumn.HeaderTextAlignment = ContentAlignment.MiddleCenter
             newColumn.AutoSizeMode = BestFitColumnMode.AllCells
+            newColumn.IsVisible = False
             grdFields.Columns.Add(newColumn)
 
         Catch ex As Exception
@@ -632,44 +701,66 @@ EH:
 
     Private Sub grdFields_Click(sender As Object, e As EventArgs) Handles grdFields.Click
 
-        Static bFlag As Boolean
-        Dim lsMsg As String
+        Try
+            rowHandle()
 
-        If grdFields.CurrentRow Is Nothing Then
-            Exit Sub
-        End If
-        If grdFields.CurrentRow.Cells(grdFieldsColumns.originalIndex) Is Nothing Then
-            Exit Sub
-        End If
-
-        If bFlag Or Counter = grdFields.CurrentRow.Cells(grdFieldsColumns.originalIndex).Value Then
-            bFlag = False
-            Exit Sub
-        End If
-
-        '-- Verifiera fält.
-        lsMsg = VerifyFields()
-
-        If lsMsg <> "" Then
-            bFlag = True
-            MsgBox(lsMsg, vbInformation, APPNAME)
-            Exit Sub
-        End If
-
-        '-- Spara värden till klass innan nästa post.
-        Call SaveFields()
-        Counter = grdFields.CurrentRow.Cells(grdFieldsColumns.originalIndex).Value
-        SetFields()
+        Catch ex As Exception
+            '
+        End Try
 
     End Sub
 
     Private Sub grdFields_CurrentRowChanged(sender As Object, e As CurrentRowChangedEventArgs) Handles grdFields.CurrentRowChanged
 
-        Dim oSender As Object = Nothing
-        Dim oE As EventArgs = Nothing
-
-        grdFields_Click(oSender, oE)
+        rowHandle()
 
     End Sub
 
+    Private Sub rowHandle()
+
+        Dim lsMsg As String
+
+        Try
+            If isNotLoading = False Then    'Dont do this when window is loading
+                Exit Sub
+            End If
+            If grdFields.CurrentRow Is Nothing Then
+                Exit Sub
+            End If
+            If grdFields.CurrentRow.Cells(grdFieldsColumns.originalIndex).Value Is Nothing Then
+                Exit Sub
+            End If
+
+            If bErrorPending Or Counter = grdFields.CurrentRow.Cells(grdFieldsColumns.originalIndex).Value Then
+                bErrorPending = False
+                Exit Sub
+            End If
+
+            '-- Verifiera fält.
+            lsMsg = VerifyFields()
+
+            If lsMsg <> "" Then
+                bErrorPending = True
+                MsgBox(lsMsg, vbInformation, APPNAME)
+                If lastRowIndex > 0 Then
+                    grdFields.CurrentRow = grdFields.Rows(lastRowIndex)
+                End If
+                Exit Sub
+            End If
+            bErrorPending = False
+
+            '-- Spara värden till klass innan nästa post.
+            Call SaveFields()
+            Counter = grdFields.CurrentRow.Cells(grdFieldsColumns.originalIndex).Value
+            lastRowIndex = grdFields.CurrentRow.Index
+            SetFields()
+
+        Catch ex As Exception
+            lsMsg = "Fel när byte av rad gjordes!"
+            lsMsg = lsMsg & vbCrLf
+            lsMsg = lsMsg & "Felet är " & ex.Message
+            MsgBox(lsMsg, vbExclamation, APPNAME)
+        End Try
+
+    End Sub
 End Class
