@@ -150,6 +150,7 @@
                 Post(J).FINFO_Length = CLng(cString.FindNextPipe)
                 Post(J).FINFO_Decimals = CLng(cString.FindNextPipe)
                 Post(J).FINFO_DataFormat = cString.FindNextPipe
+                Post(J).Comment = cString.FindNextPipe
                 cString.ResetValue()
             Loop
 

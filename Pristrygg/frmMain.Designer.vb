@@ -1,9 +1,9 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class frmMain
     Inherits Telerik.WinControls.UI.RadForm
 
     'Form overrides dispose to clean up the component list.
-    <System.Diagnostics.DebuggerNonUserCode()> _
+    <System.Diagnostics.DebuggerNonUserCode()>
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         Try
             If disposing AndAlso components IsNot Nothing Then
@@ -20,18 +20,22 @@ Partial Class frmMain
     'NOTE: The following procedure is required by the Windows Form Designer
     'It can be modified using the Windows Form Designer.  
     'Do not modify it using the code editor.
-    <System.Diagnostics.DebuggerStepThrough()> _
+    <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
-        Me.RadMenu1 = New Telerik.WinControls.UI.RadMenu()
-        Me.RadMenuItem4 = New Telerik.WinControls.UI.RadMenuItem()
+        Me.components = New System.ComponentModel.Container()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(frmMain))
+        Me.mnuFile = New Telerik.WinControls.UI.RadMenuItem()
         Me.mnuSettings = New Telerik.WinControls.UI.RadMenuItem()
         Me.RadMenuSeparatorItem1 = New Telerik.WinControls.UI.RadMenuSeparatorItem()
+        Me.mnuTheme = New Telerik.WinControls.UI.RadMenuItem()
+        Me.mnuThemes = New Telerik.WinControls.UI.RadMenuComboItem()
+        Me.RadMenuSeparatorItem2 = New Telerik.WinControls.UI.RadMenuSeparatorItem()
         Me.mnuExit = New Telerik.WinControls.UI.RadMenuItem()
-        Me.RadMenuItem5 = New Telerik.WinControls.UI.RadMenuItem()
+        Me.mnuSupplier = New Telerik.WinControls.UI.RadMenuItem()
         Me.mnuNewSupplier = New Telerik.WinControls.UI.RadMenuItem()
         Me.mnuUpdateSupplier = New Telerik.WinControls.UI.RadMenuItem()
         Me.mnuDeleteSupplier = New Telerik.WinControls.UI.RadMenuItem()
-        Me.RadMenuItem1 = New Telerik.WinControls.UI.RadMenuItem()
+        Me.mnuMainHelp = New Telerik.WinControls.UI.RadMenuItem()
         Me.mnuHelp = New Telerik.WinControls.UI.RadMenuItem()
         Me.mnuAbout = New Telerik.WinControls.UI.RadMenuItem()
         Me.AquaTheme1 = New Telerik.WinControls.Themes.AquaTheme()
@@ -62,7 +66,24 @@ Partial Class frmMain
         Me.FrameLevfiler = New Telerik.WinControls.UI.RadGroupBox()
         Me.frameLev = New Telerik.WinControls.UI.RadGroupBox()
         Me.frameCmd = New Telerik.WinControls.UI.RadGroupBox()
-        CType(Me.RadMenu1, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.menuRightclick = New Telerik.WinControls.UI.RadContextMenu(Me.components)
+        Me.menuRightclickChange = New Telerik.WinControls.UI.RadMenuItem()
+        Me.menuRightclickCopy = New Telerik.WinControls.UI.RadMenuItem()
+        Me.menuRightclickDelete = New Telerik.WinControls.UI.RadMenuItem()
+        Me.menuRightClickFiles = New Telerik.WinControls.UI.RadContextMenu(Me.components)
+        Me.menuRightClickFilesDelete = New Telerik.WinControls.UI.RadMenuItem()
+        Me.menuRightClickFilesVerify = New Telerik.WinControls.UI.RadMenuItem()
+        Me.MainMenu = New Telerik.WinControls.UI.RadMenu()
+        Me.HighContrastBlackTheme1 = New Telerik.WinControls.Themes.HighContrastBlackTheme()
+        Me.Office2007BlackTheme1 = New Telerik.WinControls.Themes.Office2007BlackTheme()
+        Me.Office2007SilverTheme1 = New Telerik.WinControls.Themes.Office2007SilverTheme()
+        Me.TelerikMetroTheme1 = New Telerik.WinControls.Themes.TelerikMetroTheme()
+        Me.TelerikMetroBlueTheme1 = New Telerik.WinControls.Themes.TelerikMetroBlueTheme()
+        Me.VisualStudio2012DarkTheme1 = New Telerik.WinControls.Themes.VisualStudio2012DarkTheme()
+        Me.VisualStudio2012LightTheme1 = New Telerik.WinControls.Themes.VisualStudio2012LightTheme()
+        Me.Windows7Theme1 = New Telerik.WinControls.Themes.Windows7Theme()
+        Me.Windows8Theme2 = New Telerik.WinControls.Themes.Windows8Theme()
+        CType(Me.mnuThemes.ComboBoxElement, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.lstLev, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.chkVerifiering, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.cmdTransfer, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -74,22 +95,15 @@ Partial Class frmMain
         Me.frameLev.SuspendLayout()
         CType(Me.frameCmd, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.frameCmd.SuspendLayout()
+        CType(Me.MainMenu, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
-        'RadMenu1
+        'mnuFile
         '
-        Me.RadMenu1.Items.AddRange(New Telerik.WinControls.RadItem() {Me.RadMenuItem4, Me.RadMenuItem5, Me.RadMenuItem1})
-        Me.RadMenu1.Location = New System.Drawing.Point(0, 0)
-        Me.RadMenu1.Name = "RadMenu1"
-        Me.RadMenu1.Size = New System.Drawing.Size(671, 20)
-        Me.RadMenu1.TabIndex = 0
-        '
-        'RadMenuItem4
-        '
-        Me.RadMenuItem4.Items.AddRange(New Telerik.WinControls.RadItem() {Me.mnuSettings, Me.RadMenuSeparatorItem1, Me.mnuExit})
-        Me.RadMenuItem4.Name = "RadMenuItem4"
-        Me.RadMenuItem4.Text = "&Arkiv"
+        Me.mnuFile.Items.AddRange(New Telerik.WinControls.RadItem() {Me.mnuSettings, Me.RadMenuSeparatorItem1, Me.mnuTheme, Me.RadMenuSeparatorItem2, Me.mnuExit})
+        Me.mnuFile.Name = "mnuFile"
+        Me.mnuFile.Text = "&Arkiv"
         '
         'mnuSettings
         '
@@ -102,16 +116,64 @@ Partial Class frmMain
         Me.RadMenuSeparatorItem1.Text = "RadMenuSeparatorItem1"
         Me.RadMenuSeparatorItem1.TextAlignment = System.Drawing.ContentAlignment.MiddleLeft
         '
+        'mnuTheme
+        '
+        Me.mnuTheme.Items.AddRange(New Telerik.WinControls.RadItem() {Me.mnuThemes})
+        Me.mnuTheme.Name = "mnuTheme"
+        Me.mnuTheme.Text = "Tema"
+        '
+        'mnuThemes
+        '
+        '
+        '
+        '
+        Me.mnuThemes.ComboBoxElement.ArrowButtonMinWidth = 17
+        Me.mnuThemes.ComboBoxElement.AutoCompleteAppend = Nothing
+        Me.mnuThemes.ComboBoxElement.AutoCompleteDataSource = Nothing
+        Me.mnuThemes.ComboBoxElement.AutoCompleteSuggest = Nothing
+        Me.mnuThemes.ComboBoxElement.DataMember = ""
+        Me.mnuThemes.ComboBoxElement.DataSource = Nothing
+        Me.mnuThemes.ComboBoxElement.DefaultValue = Nothing
+        Me.mnuThemes.ComboBoxElement.DisplayMember = ""
+        Me.mnuThemes.ComboBoxElement.DropDownAnimationEasing = Telerik.WinControls.RadEasingType.InQuad
+        Me.mnuThemes.ComboBoxElement.DropDownAnimationEnabled = True
+        Me.mnuThemes.ComboBoxElement.EditableElementText = ""
+        Me.mnuThemes.ComboBoxElement.EditorElement = Me.mnuThemes.ComboBoxElement
+        Me.mnuThemes.ComboBoxElement.EditorManager = Nothing
+        Me.mnuThemes.ComboBoxElement.Filter = Nothing
+        Me.mnuThemes.ComboBoxElement.FilterExpression = ""
+        Me.mnuThemes.ComboBoxElement.Focusable = True
+        Me.mnuThemes.ComboBoxElement.FormatString = ""
+        Me.mnuThemes.ComboBoxElement.FormattingEnabled = True
+        Me.mnuThemes.ComboBoxElement.MaxDropDownItems = 0
+        Me.mnuThemes.ComboBoxElement.MaxLength = 32767
+        Me.mnuThemes.ComboBoxElement.MaxValue = Nothing
+        Me.mnuThemes.ComboBoxElement.MinValue = Nothing
+        Me.mnuThemes.ComboBoxElement.NullValue = Nothing
+        Me.mnuThemes.ComboBoxElement.OwnerOffset = 0
+        Me.mnuThemes.ComboBoxElement.ShowImageInEditorArea = True
+        Me.mnuThemes.ComboBoxElement.SortStyle = Telerik.WinControls.Enumerations.SortStyle.None
+        Me.mnuThemes.ComboBoxElement.Value = Nothing
+        Me.mnuThemes.ComboBoxElement.ValueMember = ""
+        Me.mnuThemes.Name = "mnuThemes"
+        Me.mnuThemes.Text = "Tema"
+        '
+        'RadMenuSeparatorItem2
+        '
+        Me.RadMenuSeparatorItem2.Name = "RadMenuSeparatorItem2"
+        Me.RadMenuSeparatorItem2.Text = "RadMenuSeparatorItem2"
+        Me.RadMenuSeparatorItem2.TextAlignment = System.Drawing.ContentAlignment.MiddleLeft
+        '
         'mnuExit
         '
         Me.mnuExit.Name = "mnuExit"
         Me.mnuExit.Text = "&Avsluta"
         '
-        'RadMenuItem5
+        'mnuSupplier
         '
-        Me.RadMenuItem5.Items.AddRange(New Telerik.WinControls.RadItem() {Me.mnuNewSupplier, Me.mnuUpdateSupplier, Me.mnuDeleteSupplier})
-        Me.RadMenuItem5.Name = "RadMenuItem5"
-        Me.RadMenuItem5.Text = "&Leverantör"
+        Me.mnuSupplier.Items.AddRange(New Telerik.WinControls.RadItem() {Me.mnuNewSupplier, Me.mnuUpdateSupplier, Me.mnuDeleteSupplier})
+        Me.mnuSupplier.Name = "mnuSupplier"
+        Me.mnuSupplier.Text = "&Leverantör"
         '
         'mnuNewSupplier
         '
@@ -128,11 +190,11 @@ Partial Class frmMain
         Me.mnuDeleteSupplier.Name = "mnuDeleteSupplier"
         Me.mnuDeleteSupplier.Text = "&Ta bort markerad leverantör"
         '
-        'RadMenuItem1
+        'mnuMainHelp
         '
-        Me.RadMenuItem1.Items.AddRange(New Telerik.WinControls.RadItem() {Me.mnuHelp, Me.mnuAbout})
-        Me.RadMenuItem1.Name = "RadMenuItem1"
-        Me.RadMenuItem1.Text = "&Hjälp"
+        Me.mnuMainHelp.Items.AddRange(New Telerik.WinControls.RadItem() {Me.mnuHelp, Me.mnuAbout})
+        Me.mnuMainHelp.Name = "mnuMainHelp"
+        Me.mnuMainHelp.Text = "&Hjälp"
         '
         'mnuHelp
         '
@@ -179,7 +241,7 @@ Partial Class frmMain
         Me.statusStrip.Items.AddRange(New Telerik.WinControls.RadItem() {Me.txtProgressBar, Me.CommandBarSeparator1, Me.progressBarElement, Me.CommandBarSeparator2, Me.labelStatus, Me.CommandBarSeparator3, Me.labelDateTime})
         Me.statusStrip.Location = New System.Drawing.Point(0, 471)
         Me.statusStrip.Name = "statusStrip"
-        Me.statusStrip.Size = New System.Drawing.Size(671, 30)
+        Me.statusStrip.Size = New System.Drawing.Size(719, 30)
         Me.statusStrip.TabIndex = 7
         '
         'txtProgressBar
@@ -258,12 +320,12 @@ Partial Class frmMain
         '
         Me.frameLev.AccessibleRole = System.Windows.Forms.AccessibleRole.Grouping
         Me.frameLev.Controls.Add(Me.lstLev)
-        Me.frameLev.HeaderText = "Upplagda leverantörer"
+        Me.frameLev.HeaderText = "Upplagda leverantörsmallar"
         Me.frameLev.Location = New System.Drawing.Point(158, 19)
         Me.frameLev.Name = "frameLev"
         Me.frameLev.Size = New System.Drawing.Size(489, 173)
         Me.frameLev.TabIndex = 8
-        Me.frameLev.Text = "Upplagda leverantörer"
+        Me.frameLev.Text = "Upplagda leverantörsmallar"
         '
         'frameCmd
         '
@@ -276,24 +338,66 @@ Partial Class frmMain
         Me.frameCmd.Size = New System.Drawing.Size(128, 439)
         Me.frameCmd.TabIndex = 9
         '
+        'menuRightclick
+        '
+        Me.menuRightclick.Items.AddRange(New Telerik.WinControls.RadItem() {Me.menuRightclickChange, Me.menuRightclickCopy, Me.menuRightclickDelete})
+        '
+        'menuRightclickChange
+        '
+        Me.menuRightclickChange.Name = "menuRightclickChange"
+        Me.menuRightclickChange.Text = "Ändra mallen"
+        '
+        'menuRightclickCopy
+        '
+        Me.menuRightclickCopy.Name = "menuRightclickCopy"
+        Me.menuRightclickCopy.Text = "Kopiera mallen"
+        '
+        'menuRightclickDelete
+        '
+        Me.menuRightclickDelete.Name = "menuRightclickDelete"
+        Me.menuRightclickDelete.Text = "Ta bort mallen"
+        '
+        'menuRightClickFiles
+        '
+        Me.menuRightClickFiles.Items.AddRange(New Telerik.WinControls.RadItem() {Me.menuRightClickFilesDelete, Me.menuRightClickFilesVerify})
+        '
+        'menuRightClickFilesDelete
+        '
+        Me.menuRightClickFilesDelete.Name = "menuRightClickFilesDelete"
+        Me.menuRightClickFilesDelete.Text = "Ta bort filen"
+        '
+        'menuRightClickFilesVerify
+        '
+        Me.menuRightClickFilesVerify.Name = "menuRightClickFilesVerify"
+        Me.menuRightClickFilesVerify.Text = "Verifiera filen"
+        '
+        'MainMenu
+        '
+        Me.MainMenu.Items.AddRange(New Telerik.WinControls.RadItem() {Me.mnuFile, Me.mnuSupplier, Me.mnuMainHelp})
+        Me.MainMenu.Location = New System.Drawing.Point(0, 0)
+        Me.MainMenu.Name = "MainMenu"
+        Me.MainMenu.Size = New System.Drawing.Size(719, 20)
+        Me.MainMenu.TabIndex = 0
+        '
         'frmMain
         '
         Me.AccessibleName = "frmMain"
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(671, 501)
+        Me.ClientSize = New System.Drawing.Size(719, 501)
         Me.Controls.Add(Me.frameCmd)
         Me.Controls.Add(Me.frameLev)
         Me.Controls.Add(Me.FrameLevfiler)
         Me.Controls.Add(Me.statusStrip)
-        Me.Controls.Add(Me.RadMenu1)
+        Me.Controls.Add(Me.MainMenu)
+        Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.Name = "frmMain"
         '
         '
         '
         Me.RootElement.ApplyShapeToControl = True
         Me.Text = "Pristrygg"
-        CType(Me.RadMenu1, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.mnuThemes.ComboBoxElement, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.lstLev, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.chkVerifiering, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.cmdTransfer, System.ComponentModel.ISupportInitialize).EndInit()
@@ -306,19 +410,19 @@ Partial Class frmMain
         CType(Me.frameCmd, System.ComponentModel.ISupportInitialize).EndInit()
         Me.frameCmd.ResumeLayout(False)
         Me.frameCmd.PerformLayout()
+        CType(Me.MainMenu, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
     End Sub
-    Friend WithEvents RadMenu1 As Telerik.WinControls.UI.RadMenu
-    Friend WithEvents RadMenuItem4 As Telerik.WinControls.UI.RadMenuItem
+    Friend WithEvents mnuFile As Telerik.WinControls.UI.RadMenuItem
     Friend WithEvents mnuSettings As Telerik.WinControls.UI.RadMenuItem
     Friend WithEvents RadMenuSeparatorItem1 As Telerik.WinControls.UI.RadMenuSeparatorItem
     Friend WithEvents mnuExit As Telerik.WinControls.UI.RadMenuItem
-    Friend WithEvents RadMenuItem5 As Telerik.WinControls.UI.RadMenuItem
+    Friend WithEvents mnuSupplier As Telerik.WinControls.UI.RadMenuItem
     Friend WithEvents mnuNewSupplier As Telerik.WinControls.UI.RadMenuItem
-    Friend WithEvents RadMenuItem1 As Telerik.WinControls.UI.RadMenuItem
+    Friend WithEvents mnuMainHelp As Telerik.WinControls.UI.RadMenuItem
     Friend WithEvents mnuUpdateSupplier As Telerik.WinControls.UI.RadMenuItem
     Friend WithEvents mnuDeleteSupplier As Telerik.WinControls.UI.RadMenuItem
     Friend WithEvents mnuHelp As Telerik.WinControls.UI.RadMenuItem
@@ -351,5 +455,25 @@ Partial Class frmMain
     Friend WithEvents FrameLevfiler As Telerik.WinControls.UI.RadGroupBox
     Friend WithEvents frameLev As Telerik.WinControls.UI.RadGroupBox
     Friend WithEvents frameCmd As Telerik.WinControls.UI.RadGroupBox
+    Friend WithEvents menuRightclick As Telerik.WinControls.UI.RadContextMenu
+    Friend WithEvents menuRightclickChange As Telerik.WinControls.UI.RadMenuItem
+    Friend WithEvents menuRightclickCopy As Telerik.WinControls.UI.RadMenuItem
+    Friend WithEvents menuRightclickDelete As Telerik.WinControls.UI.RadMenuItem
+    Friend WithEvents menuRightClickFiles As Telerik.WinControls.UI.RadContextMenu
+    Friend WithEvents menuRightClickFilesDelete As Telerik.WinControls.UI.RadMenuItem
+    Friend WithEvents menuRightClickFilesVerify As Telerik.WinControls.UI.RadMenuItem
+    Friend WithEvents RadMenuSeparatorItem2 As Telerik.WinControls.UI.RadMenuSeparatorItem
+    Friend WithEvents mnuTheme As Telerik.WinControls.UI.RadMenuItem
+    Friend WithEvents mnuThemes As Telerik.WinControls.UI.RadMenuComboItem
+    Friend WithEvents MainMenu As Telerik.WinControls.UI.RadMenu
+    Friend WithEvents HighContrastBlackTheme1 As Telerik.WinControls.Themes.HighContrastBlackTheme
+    Friend WithEvents Office2007BlackTheme1 As Telerik.WinControls.Themes.Office2007BlackTheme
+    Friend WithEvents Office2007SilverTheme1 As Telerik.WinControls.Themes.Office2007SilverTheme
+    Friend WithEvents TelerikMetroTheme1 As Telerik.WinControls.Themes.TelerikMetroTheme
+    Friend WithEvents TelerikMetroBlueTheme1 As Telerik.WinControls.Themes.TelerikMetroBlueTheme
+    Friend WithEvents VisualStudio2012DarkTheme1 As Telerik.WinControls.Themes.VisualStudio2012DarkTheme
+    Friend WithEvents VisualStudio2012LightTheme1 As Telerik.WinControls.Themes.VisualStudio2012LightTheme
+    Friend WithEvents Windows7Theme1 As Telerik.WinControls.Themes.Windows7Theme
+    Friend WithEvents Windows8Theme2 As Telerik.WinControls.Themes.Windows8Theme
 End Class
 

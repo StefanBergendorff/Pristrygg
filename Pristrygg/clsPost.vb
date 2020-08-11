@@ -13,6 +13,7 @@
     Private m_FINFO_Decimals As Integer
     Private m_FINFO_Alignment As Byte
     Private m_FINFO_DataFormat As String
+    Private m_Comment As String
 
 
     Private Sub Class_Initialize()
@@ -170,6 +171,21 @@
         End Get
         Set(value As Boolean)
             m_TemplateField = value
+        End Set
+
+    End Property
+
+    'Data
+    Public Property Comment() As String
+        Get
+            Comment = m_Comment
+        End Get
+        Set(inValue As String)
+            m_Comment = inValue
+            'Last pipe is often the data format and not the comment. In that case set comment to blanks
+            If FINFO_DataFormat = m_Comment Then
+                m_Comment = ""
+            End If
         End Set
 
     End Property

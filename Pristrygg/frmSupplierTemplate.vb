@@ -15,6 +15,7 @@ Public Class FrmSupplierTemplate
         fieldname = 0
         description
         mandatory
+        comment
         type
         length
         active
@@ -80,7 +81,7 @@ Public Class FrmSupplierTemplate
             cmbFilTyp.Items.Add(FILE_ANSI)
             cmbFilTyp.Items.Add(FILE_DOS)
             cmbFilTyp.Items.Add(FILE_EXCEL_ANSI)
-            cmbFilTyp.Items.Add(FILE_EXCEL_DOS)
+            'cmbFilTyp.Items.Add(FILE_EXCEL_DOS)
             cmbFilTyp.Items.Add(FILE_CSV)
 
 
@@ -95,32 +96,39 @@ Public Class FrmSupplierTemplate
             ElseIf Me.Tag = "OLDLEV" Then
                 txtLevNamn.Text = cLev.LevNamn
                 txtLevNr.Text = cLev.LevNr
-                If cLev.FileFormat = FILE_CSV Then
-                    cmbFilTyp.Text = cLev.FileFormat
-                Else
-                    cmbFilTyp.Text = UCase(cLev.FileFormat)
-                End If
+                Select Case UCase(cLev.FileFormat)
+                    Case FILE_EXCEL_ANSI_OLD
+                        cmbFilTyp.Text = FILE_EXCEL_ANSI
+                    Case FILE_EXCEL_DOS
+                        cmbFilTyp.Text = FILE_EXCEL_ANSI
+                    Case FILE_ANSI_OLD
+                        cmbFilTyp.Text = FILE_ANSI
+                    Case FILE_DOS_OLD
+                        cmbFilTyp.Text = FILE_DOS
+                    Case Else
+                        cmbFilTyp.Text = cLev.FileFormat
+                End Select
 
                 'Set index in filetype
                 For i = 0 To cmbFilTyp.Items.Count - 1
-                    If cmbFilTyp.Items(i).Text = cmbFilTyp.Text Then
-                        cmbFilTyp.SelectedItem = cmbFilTyp.Items(i)
-                        cmbFilTyp.SelectedIndex = i
-                        Exit For
-                    End If
-                Next
+                        If cmbFilTyp.Items(i).Text = cmbFilTyp.Text Then
+                            cmbFilTyp.SelectedItem = cmbFilTyp.Items(i)
+                            cmbFilTyp.SelectedIndex = i
+                            Exit For
+                        End If
+                    Next
 
-                txtHeader.Text = cLev.Header
+                    txtHeader.Text = cLev.Header
 
-                If UCase(cLev.FileFormat) = FILE_EXCEL_ANSI Or UCase(cLev.FileFormat) = FILE_EXCEL_DOS Then
+                If cLev.FileFormat = FILE_EXCEL_ANSI Or cLev.FileFormat = FILE_EXCEL_DOS Then
                     bExcel = True
                 Else
                     bExcel = False
+                    End If
+
                 End If
 
-            End If
-
-            Counter = 1
+                Counter = 1
             lastRowIndex = -1
             SetFields()
             InitializeGrid()
@@ -438,7 +446,6 @@ EH:
                     grdFields.Rows(Counter - 1).Cells(grdFieldsColumns.divider).Value = ""
                 Else
                     '-- Räkna om kolumnbokstav till motsvarande nummer.
-                    'cLev.Post(MALL_POST(Counter)).StartPos = Asc(UCase(txtStartPos.Text)) - 64
                     cLev.Post(MALL_POST(Counter)).StartPos = cExcel.ReplaceLetterWithDigit(UCase(txtStartPos.Text))
                     grdFields.Rows(Counter - 1).Cells(grdFieldsColumns.active).Value = "Ja"
                     grdFields.Rows(Counter - 1).Cells(grdFieldsColumns.chosenValue).Value = UCase(txtStartPos.Text)
@@ -495,6 +502,7 @@ EH:
                 If cLev.Post(MALL_POST(j)).FINFO_Description.Substring(Len(cLev.Post(MALL_POST(j)).FINFO_Description) - 1, 1) = "*" Then
                     rowInfo.Cells(grdFieldsColumns.mandatory).Value = "Ja"
                 End If
+                rowInfo.Cells(grdFieldsColumns.comment).Value = cLev.Post(MALL_POST(j)).Comment
                 rowInfo.Cells(grdFieldsColumns.type).Value = cLev.Post(MALL_POST(j)).FINFO_DataFormat
                 If cLev.Post(MALL_POST(j)).FINFO_DataFormat = "Tal" Then
                     rowInfo.Cells(grdFieldsColumns.length).Value = cLev.Post(MALL_POST(j)).FINFO_Length & "," & cLev.Post(MALL_POST(j)).FINFO_Decimals
@@ -505,6 +513,8 @@ EH:
                     rowInfo.Cells(grdFieldsColumns.active).Value = "Ja"
                     If InStr(cLev.FileFormat, "EXCEL") > 0 Then
                         rowInfo.Cells(grdFieldsColumns.chosenValue).Value = cExcel.ReplaceDigitWithLetter(cLev.Post(MALL_POST(j)).StartPos)
+                    ElseIf cLev.FileFormat = FILE_CSV Then 'Semikolon
+                        rowInfo.Cells(grdFieldsColumns.chosenValue).Value = cLev.Post(MALL_POST(j)).StartPos
                     Else
                         rowInfo.Cells(grdFieldsColumns.chosenValue).Value = cLev.Post(MALL_POST(j)).StartPos & " - " & cLev.Post(MALL_POST(j)).StartPos + cLev.Post(MALL_POST(j)).Length - 1
                     End If
@@ -600,6 +610,17 @@ EH:
             newColumn.TextAlignment = ContentAlignment.MiddleCenter
             newColumn.HeaderText = "Bör anges"
             newColumn.HeaderTextAlignment = ContentAlignment.MiddleCenter
+            newColumn.AutoSizeMode = BestFitColumnMode.AllCells
+            newColumn.IsVisible = False
+            grdFields.Columns.Add(newColumn)
+
+            'Comment
+            newColumn = New GridViewTextBoxColumn()
+            newColumn.FieldName = "comment"
+            newColumn.ReadOnly = True
+            newColumn.TextAlignment = ContentAlignment.MiddleLeft
+            newColumn.HeaderText = "Kommentar"
+            newColumn.HeaderTextAlignment = ContentAlignment.MiddleLeft
             newColumn.AutoSizeMode = BestFitColumnMode.AllCells
             grdFields.Columns.Add(newColumn)
 

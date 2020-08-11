@@ -22,6 +22,7 @@ Partial Class FrmParameters
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(FrmParameters))
         Me.RadGroupBox1 = New Telerik.WinControls.UI.RadGroupBox()
         Me.txtAS400Dir = New Telerik.WinControls.UI.RadTextBox()
         Me.txtOutputDir = New Telerik.WinControls.UI.RadTextBox()
@@ -162,6 +163,7 @@ Partial Class FrmParameters
         Me.Controls.Add(Me.cmdCancel)
         Me.Controls.Add(Me.cmdSave)
         Me.Controls.Add(Me.RadGroupBox1)
+        Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.Name = "FrmParameters"
         '
         '

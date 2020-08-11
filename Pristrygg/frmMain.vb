@@ -1,6 +1,7 @@
 ﻿Imports System.ComponentModel
 Imports Excel = Microsoft.Office.Interop.Excel
-
+Imports Telerik.WinControls
+Imports Telerik.WinControls.UI
 
 Public Class frmMain
 
@@ -27,19 +28,19 @@ Public Class frmMain
     End Sub
 
     Private Sub mnuUpdateSupplier_Click(sender As Object, e As EventArgs) Handles mnuUpdateSupplier.Click
-        On Error GoTo EH
 
-        If Not LoadIniFile() Then Exit Sub
+        Try
+            If Not LoadIniFile() Then Exit Sub
 
-        FrmSupplierTemplate.Tag = "OLDLEV"
-        FrmSupplierTemplate.Show()
-        Me.Hide()
+            FrmSupplierTemplate.Tag = "OLDLEV"
+            FrmSupplierTemplate.Show()
+            Me.Hide()
 
-        Exit Sub
 
-EH:
-        MsgBox("Ett fel har inträffat." & vbCrLf & "Felbeskrivning :  " & Err.Description, vbInformation, APPNAME)
+        Catch ex As Exception
+            MsgBox("Ett fel har inträffat." & vbCrLf & "Felbeskrivning :  " & Err.Description, vbInformation, APPNAME)
 
+        End Try
 
     End Sub
 
@@ -47,28 +48,28 @@ EH:
 
         Dim lsLevFile As String
 
-        lsLevFile = lstLev.SelectedItem.Text
+        Try
+            lsLevFile = lstLev.SelectedItem.Text
 
-        If Len(lsLevFile) = 0 Then
-            MsgBox("Markera den leverantör i listan som ska tas bort.", vbInformation, APPNAME)
-            Exit Sub
-        End If
+            If Len(lsLevFile) = 0 Then
+                MsgBox("Markera den mall i listan som ska tas bort.", vbInformation, APPNAME)
+                Exit Sub
+            End If
 
-        If MsgBox("Är du säker på att du vill plocka bort leverantör " & lsLevFile & " ?", vbYesNo + vbQuestion, APPNAME) = vbNo Then
-            Exit Sub
-        End If
+            If MsgBox("Är du säker på att du vill plocka bort mallen " & lsLevFile & " ?", vbYesNo + vbQuestion, APPNAME) = vbNo Then
+                Exit Sub
+            End If
 
-        Kill(FixDirStr(APP_DIR_MALL) & lsLevFile)
+            Kill(FixDirStr(APP_DIR_MALL) & lsLevFile)
 
-        MsgBox("Leverantören borttagen.", vbInformation)
+            'MsgBox("Mallen är nu borttagen.", vbInformation)
 
-        UpdateListboxes()
+            UpdateListboxes()
 
-        Exit Sub
+        Catch ex As Exception
+            MsgBox("Ett fel har inträffat." & vbCrLf & "Felbeskrivning :  " & Err.Description, vbInformation, APPNAME)
 
-EH:
-        MsgBox("Ett fel har inträffat." & vbCrLf & "Felbeskrivning :  " & Err.Description, vbInformation, APPNAME)
-
+        End Try
     End Sub
 
     Private Sub mnuHelp_Click(sender As Object, e As EventArgs) Handles mnuHelp.Click
@@ -76,6 +77,120 @@ EH:
     End Sub
 
     Private Sub mnuAbout_Click(sender As Object, e As EventArgs) Handles mnuAbout.Click
+
+    End Sub
+
+    Private Sub menuRightclickChange_Click(sender As Object, e As EventArgs) Handles menuRightclickChange.Click
+
+        mnuUpdateSupplier_Click(sender, e)
+
+    End Sub
+
+    Private Sub menuRightclickCopy_Click(sender As Object, e As EventArgs) Handles menuRightclickCopy.Click
+
+        copySupplierTemplate()
+
+    End Sub
+
+    Private Sub menuRightclickDelete_Click(sender As Object, e As EventArgs) Handles menuRightclickDelete.Click
+
+        mnuDeleteSupplier_Click(sender, e)
+
+    End Sub
+
+    Private Sub lstLev_MouseDown(sender As Object, e As MouseEventArgs) Handles lstLev.MouseDown
+
+        Dim args = TryCast(e, MouseEventArgs)
+        Dim clickedElement As RadListVisualItem
+
+        If args.Button = MouseButtons.Right Then
+
+            Dim listControl As RadListControl = DirectCast(sender, RadListControl)
+            clickedElement = TryCast(listControl.ListElement.ElementTree.GetElementAtPoint(e.Location), RadListVisualItem)
+            If clickedElement IsNot Nothing Then
+                lstLev.SelectedItem = clickedElement.Data
+            End If
+        End If
+
+    End Sub
+
+    Private Sub menuRightClickFilesDelete_Click(sender As Object, e As EventArgs) Handles menuRightClickFilesDelete.Click
+
+        Dim sFile As String
+
+        Try
+            sFile = lstFiles.SelectedItem.Text
+
+            If Len(sFile) = 0 Then
+                MsgBox("Markera den fil i listan som ska tas bort.", vbInformation, APPNAME)
+                Exit Sub
+        End If
+
+        If MsgBox("Är du säker på att du vill plocka bort filen " & sFile & " ?", vbYesNo + vbQuestion, APPNAME) = vbNo Then
+            Exit Sub
+        End If
+
+        Kill(FixDirStr(APP_DIR_INDATA) & sFile)
+
+        UpdateListboxes()
+
+        Catch ex As Exception
+            MsgBox("Ett fel har inträffat." & vbCrLf & "Felbeskrivning :  " & Err.Description, vbInformation, APPNAME)
+
+        End Try
+
+    End Sub
+
+    Private Sub menuRightClickFilesVerify_Click(sender As Object, e As EventArgs) Handles menuRightClickFilesVerify.Click
+
+        chkVerifiering.Checked = True
+        cmdTransfer_Click(sender, e)
+
+    End Sub
+
+    Private Sub lstLev_MouseUp(sender As Object, e As MouseEventArgs) Handles lstLev.MouseUp
+
+        Dim args = TryCast(e, MouseEventArgs)
+
+        If args.Button = MouseButtons.Right Then
+            menuRightclick.Show(lstLev, args.Location)
+        End If
+
+    End Sub
+
+    Private Sub lstFiles_MouseDown(sender As Object, e As MouseEventArgs) Handles lstFiles.MouseDown
+
+        Dim args = TryCast(e, MouseEventArgs)
+        Dim clickedElement As RadListVisualItem
+
+        If args.Button = MouseButtons.Right Then
+
+            Dim listControl As RadListControl = DirectCast(sender, RadListControl)
+            clickedElement = TryCast(listControl.ListElement.ElementTree.GetElementAtPoint(e.Location), RadListVisualItem)
+            If clickedElement IsNot Nothing Then
+                lstFiles.SelectedItem = clickedElement.Data
+            End If
+        End If
+
+    End Sub
+
+    Private Sub lstFiles_MouseUp(sender As Object, e As MouseEventArgs) Handles lstFiles.MouseUp
+
+        Dim args = TryCast(e, MouseEventArgs)
+
+        If args.Button = MouseButtons.Right Then
+            menuRightClickFiles.Show(lstFiles, args.Location)
+        End If
+
+    End Sub
+
+    Private Sub chkVerifiering_ToggleStateChanged(sender As Object, args As Telerik.WinControls.UI.StateChangedEventArgs) Handles chkVerifiering.ToggleStateChanged
+
+        If args.ToggleState = Telerik.WinControls.Enumerations.ToggleState.Off Then
+            cmdTransfer.Text = "Skapa fil till Trygg"
+        Else
+            cmdTransfer.Text = "Verifiera infilen"
+        End If
 
     End Sub
 
@@ -93,56 +208,170 @@ EH:
         'Observera att Vilma1 2.1 har exakt lika lång postlängd - 1508 tecken som en Vilma2 fil.
         'Därför måste en fråga ställas om det är en Vilma2, eller en Vilma1 som efterfrågas.
 
-        On Error GoTo EH
+        Try
 
-        bTransfer = False
-        sTryggFile = ""
+            bTransfer = False
+            sTryggFile = ""
+            cLev = New clsSupplier
 
-        '--->2009-08-20, kontrollerar uppkopplingen mot 400an direkt
-        '-- Kontroll att AS400 katalog existerar och att det finns en nätverksuppkoppling
-        If chkVerifiering.Checked = False Then
-            If Not DirExist(APP_DIR_AS400) Then
-                s = "Katalogen " & APP_DIR_AS400 & " där filen till AS400 skapas finns inte."
-                s = s & vbCrLf
-                s = s & "Gå in i inställningar och skriv in en giltig sökväg."
-                s = s & vbCrLf
-                s = s & "Eventuellt har inte " & APP_DIR_AS400 & " anslutits och en nätverkskoppling till " & APP_DIR_AS400 & " saknas."
-                s = s & vbCrLf
-                s = s & "Öppna i så fall utforskaren och anslut " & APP_DIR_AS400 & " genom att högerklicka på " & APP_DIR_AS400 & " och välja Anslut."
-                MsgBox(s, vbInformation, APPNAME)
-                Exit Sub
+            'kontrollerar uppkopplingen mot 400an direkt
+            '-- Kontroll att AS400 katalog existerar och att det finns en nätverksuppkoppling
+            If chkVerifiering.Checked = False Then
+                If Not DirExist(APP_DIR_AS400) Then
+                    s = "Katalogen " & APP_DIR_AS400 & " där filen till AS400 skapas finns inte."
+                    s = s & vbCrLf
+                    s = s & "Gå in i inställningar och skriv in en giltig sökväg."
+                    s = s & vbCrLf
+                    s = s & "Eventuellt har inte " & APP_DIR_AS400 & " anslutits och en nätverkskoppling till " & APP_DIR_AS400 & " saknas."
+                    s = s & vbCrLf
+                    s = s & "Öppna i så fall utforskaren och anslut " & APP_DIR_AS400 & " genom att högerklicka på " & APP_DIR_AS400 & " och välja Anslut."
+                    MsgBox(s, vbInformation, APPNAME)
+                    Exit Sub
+                End If
             End If
-        End If
-        '---<2009-08-20
 
-        'Kolla om leverantör iklickad
-        If lstLev.SelectedIndex > 0 Then
-            transferExtern()
-        Else
-            transferFinfoVilma()
-        End If
-
-        'Ska filen föras över direkt, eller endast verifieras
-        If bTransfer = True Then
-            If chkVerifiering.Checked = True Then
-                mnuVerifyTryggFile_Click()
+            'Kolla om leverantör iklickad
+            If lstLev.SelectedIndex >= 0 Then
+                transferExtern()
             Else
-                transferAS400()
+                transferFinfoVilma()
             End If
-        End If
+
+            'Ska filen föras över direkt, eller endast verifieras
+            If bTransfer = True Then
+                If chkVerifiering.Checked = True Then
+                    mnuVerifyTryggFile_Click()
+                Else
+                    transferAS400()
+                End If
+            End If
+
+
+        Catch ex As Exception
+            If Err.Description <> "" Then
+                MsgBox("Ett fel har inträffat." & vbCrLf & "Felbeskrivning:" & vbCrLf & Err.Number & " - " & Err.Description, vbInformation, APPNAME)
+            End If
+        End Try
 
         labelStatus.Text = ""
         Me.Cursor = Cursors.Default
 
-        '--->2009-08-20
-EH:
-        If Err.Description <> "" Then
-            MsgBox("Ett fel har inträffat." & vbCrLf & "Felbeskrivning:" & vbCrLf & Err.Number & " - " & Err.Description, vbInformation, APPNAME)
-        End If
-        On Error GoTo 0
-        '---<2009-08-20
+    End Sub
+
+    Private Sub ComboBoxElement_SelectedIndexChanged(ByVal sender As Object, ByVal e As EventArgs)
+
+        Dim item As RadListDataItem = TryCast((TryCast(sender, RadDropDownListElement)).SelectedItem, RadListDataItem)
+        Dim s As String
+
+        s = APP_NAME & "\" & Me.Name
+        oWshShell.RegWrite(s & "Theme", item.Text)
+
+        ThemeResolutionService.ApplicationThemeName = item.Text
 
     End Sub
+
+    Private Sub frmMain_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
+        oWshShell = CreateObject("WScript.Shell")
+        GetSaveWindowsPreferences("Get", Me)
+        labelDateTime.Text = Date.Now.ToString
+        labelStatus.Text = ""
+        AddHandler mnuThemes.ComboBoxElement.SelectedIndexChanged, AddressOf ComboBoxElement_SelectedIndexChanged
+
+        'Fill menu combo with themes
+        getTheme()
+
+        'Make Some controls not visible
+        progressBarElement.Value1 = 0
+        progressBarElement.Visibility = Telerik.WinControls.ElementVisibility.Hidden
+        txtProgressBar.Visibility = Telerik.WinControls.ElementVisibility.Hidden
+
+
+    End Sub
+
+    Private Sub frmMain_Resize(sender As Object, e As EventArgs) Handles Me.Resize
+
+        Dim lW As Long
+        Dim lH As Long
+        Dim dblFactorW As Double
+        Dim dblFactorH As Double
+
+        lW = System.Math.Abs(Me.Width - 100)
+        lH = System.Math.Abs(Me.Height - 100)
+        dblFactorW = 0.95
+        dblFactorH = 0.87
+
+        frameCmd.Height = System.Math.Abs(lH * (dblFactorH + 0.15))
+
+        frameLev.Height = System.Math.Abs(frameCmd.Height * 0.4)
+        lstLev.Height = System.Math.Abs(frameLev.Height * (dblFactorH - 0.035))
+        frameLev.Width = System.Math.Abs(lW - frameCmd.Width - 30)
+        lstLev.Width = System.Math.Abs(frameLev.Width * dblFactorW)
+
+        FrameLevfiler.Top = System.Math.Abs(frameLev.Top + frameLev.Height + 10)
+        FrameLevfiler.Height = System.Math.Abs(frameCmd.Height * 0.57)
+        lstFiles.Height = System.Math.Abs(FrameLevfiler.Height * (dblFactorH + 0.01))
+        FrameLevfiler.Width = frameLev.Width
+        lstFiles.Width = lstLev.Width
+
+    End Sub
+
+    Private Sub frmMain_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
+
+        GetSaveWindowsPreferences("Save", Me)
+
+    End Sub
+
+    Private Sub frmMain_Activated(sender As Object, e As EventArgs) Handles Me.Activated
+        On Error GoTo EH
+
+        Me.Text = "PrisTrygg.  Version : " & Application.ProductVersion
+
+
+        '-- Om inte alla registervärden är satta så visa fönster med inställningar
+        '-- "frmParameters". Om vi kommer i retur från "frmParameters" via "Avbryt-knappen"
+        '-- och nödvändiga registervärden inte är satta så meddelas detta till användaren
+        '-- vars enda valmöjligheter är att avsluta programmet eller gå till inställningar.
+
+        If Not RegAppDirExist() Then
+            If Not DirExist("C:\" & APPNAME) Then MkDir("C:\" & APPNAME)
+            If Not DirExist("C:\" & APPNAME & "\Mall") Then MkDir("C:\" & APPNAME & "\Mall")
+            If Not DirExist("C:\" & APPNAME & "\In") Then MkDir("C:\" & APPNAME & "\In")
+            If Not DirExist("C:\" & APPNAME & "\Ut") Then MkDir("C:\" & APPNAME & "\Ut")
+            Call SetRegistryValues()
+        End If
+
+        '-- Kommer från frmSupplierTemplate. Registervärden redan satta.
+        If Me.Tag = "LEV" Then
+            Me.Tag = ""
+        Else
+            If Not ReitriveRegEditSettings() Then
+                'Valt "Avbryt" i inställningar.
+                If Me.Tag = "CANCEL" Then
+                    Me.Tag = ""
+
+                    '-- Knappen "Avsluta" och menyn klickbar.
+                    MsgBox("Nödvändiga registervärden ej satta!", vbInformation, APPNAME)
+
+                    Exit Sub
+                Else
+                    '-- Fönster med inställningar visas.
+                    FrmParameters.Show()
+                    FrmParameters.BringToFront()
+                    Exit Sub
+                End If
+            End If
+        End If
+
+        UpdateListboxes()
+
+        Exit Sub
+
+EH:
+        MsgBox("Ett fel har inträffat." & vbCrLf & "Felbeskrivning :  " & Err.Description, vbInformation, APPNAME)
+
+    End Sub
+
 
     Private Sub transferExtern()
         Dim lsInfil As String
@@ -190,7 +419,7 @@ EH:
 
             Me.Cursor = Cursors.WaitCursor
 
-            '-- Läs i  n egenskaper från mall-fil till objektet.
+            '-- Läs in egenskaper från mall-fil till objektet.
             If Not LoadIniFile() Then
                 Me.Cursor = Cursors.Default
                 Exit Sub
@@ -198,9 +427,9 @@ EH:
 
 
             '-- Om det är en excel-fil från leverantören, gör om den till en textfil.
-            If cLev.FileFormat = FILE_EXCEL_ANSI Or cLev.FileFormat = FILE_EXCEL_DOS Then
+            If cLev.FileFormat = FILE_EXCEL_ANSI Or cLev.FileFormat = FILE_EXCEL_ANSI_OLD Or cLev.FileFormat = FILE_EXCEL_DOS Then
                 labelStatus.Text = "Omvandla Excelfil till textfil..."
-
+                Application.DoEvents()
                 '-- Skapa namnet på textfilen (xls byts mot txt)
                 i = InStrRev(lsInfil, ".")
                 If i = 0 Then
@@ -231,13 +460,12 @@ EH:
             End If
 
             labelStatus.Text = "Kopierar till Trygg och rensar upp..."
-            If cLev.FileFormat = FILE_EXCEL_ANSI Or cLev.FileFormat = FILE_EXCEL_DOS Then
+            If cLev.FileFormat = FILE_EXCEL_ANSI Or cLev.FileFormat = FILE_EXCEL_ANSI_OLD Or cLev.FileFormat = FILE_EXCEL_DOS Then
                 '-- Döda textfilen.
                 Kill(lsInfil)
                 '-- Sätt [lsInFil] till orginal-excelfilen för backup.
                 lsInfil = lsOldInFil
             End If
-
 
             Me.Cursor = Cursors.Default
 
@@ -294,11 +522,12 @@ EH:
         Dim llRecord As Long
         Dim bFinfo As Boolean
         Dim bVilma As Boolean
-        Dim bVilma2 As Boolean  '2012-01-30
+        Dim bVilma2 As Boolean
         Dim s As String
         Dim lPostLangd As Long
-        Dim bFirstRecord As Boolean '2013-03-07
-        Dim bBidCon As Boolean  '2013-03-07
+        Dim bFirstRecord As Boolean
+        Dim bBidCon As Boolean
+        Dim sSelectedFile As String
 
         On Error GoTo EH
 
@@ -316,6 +545,7 @@ EH:
             lstFiles.Focus()
             Exit Sub
         End If
+        sSelectedFile = lstFiles.SelectedItem.Text
 
         lsInfil = FixDirStr(APP_DIR_INDATA) & lstFiles.SelectedItem.Text
         labelStatus.Text = "Bestämer Finfo/Vilma..."
@@ -422,7 +652,7 @@ EH:
                 '--->2013-03-07
             Else
                 '-- Verifiera att alla rader är rätt antal tecken
-                If Len(lsBuffer) <> lPostLangd Then 'Post med fel postlängd
+                If Len(lsBuffer) <> lPostLangd And False Then 'Post med fel postlängd
                     bFinfo = False
                     bVilma = False
                     bVilma2 = False
@@ -464,8 +694,8 @@ EH:
         lsUtFil = FixDirStr(APP_DIR_UTDATA) & lsUtFil
 
         lsBackUpDirParent = FixDirStr(APP_DIR_INDATA) & "backup"
-        lsBackUpDirChild = lsBackUpDirParent & "\" & Format(System.DateTime.Now, "YYYYMMDD")
-        lsBackUpFil = lsBackUpDirChild & "\" & lstFiles.SelectedItem.Text
+        lsBackUpDirChild = lsBackUpDirParent & "\" & Format(System.DateTime.Now, "yyyyMMdd")
+        lsBackUpFil = lsBackUpDirChild & "\" & sSelectedFile
 
         '-- Kontroll att utdatakatalog existerar.
         If Not DirExist(APP_DIR_UTDATA) Then
@@ -478,13 +708,13 @@ EH:
         If FileExists(lsUtFil) Then
             Kill(lsUtFil)  'Tar bort den utan att fråga
         Else
-            MsgBox("Rutinen avbryts.", vbInformation)
-            Exit Sub
+            'MsgBox("Rutinen avbryts.", vbInformation)
+            'Exit Sub
         End If
 
         '-- Öppna infil för läsning.
         FnrIn = FreeFile()
-        FileOpen(FnrIn, lsBackUpFil, OpenMode.Input)
+        FileOpen(FnrIn, lsInfil, OpenMode.Input)
 
         bFileOpen = True
 
@@ -651,108 +881,6 @@ EH:
 
 
     End Function
-
-
-
-
-    Private Sub frmMain_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-
-        oWshShell = CreateObject("WScript.Shell")
-        GetSaveWindowsPreferences("Get", Me)
-        labelDateTime.Text = Date.Now.ToString
-        labelStatus.Text = ""
-
-        'Gör vissa kontroller visable = No
-        progressBarElement.Value1 = 0
-        progressBarElement.Visibility = Telerik.WinControls.ElementVisibility.Hidden
-        txtProgressBar.Visibility = Telerik.WinControls.ElementVisibility.Hidden
-
-
-    End Sub
-
-
-    Private Sub frmMain_Resize(sender As Object, e As EventArgs) Handles Me.Resize
-
-        Dim lW As Long
-        Dim lH As Long
-        Dim dblFactorW As Double
-        Dim dblFactorH As Double
-
-        lW = System.Math.Abs(Me.Width - 100)
-        lH = System.Math.Abs(Me.Height - 100)
-        dblFactorW = 0.95
-        dblFactorH = 0.87
-
-        frameCmd.Height = System.Math.Abs(lH * (dblFactorH + 0.15))
-
-        frameLev.Height = System.Math.Abs(frameCmd.Height * 0.4)
-        lstLev.Height = System.Math.Abs(frameLev.Height * (dblFactorH - 0.035))
-        frameLev.Width = System.Math.Abs(lW - frameCmd.Width - 30)
-        lstLev.Width = System.Math.Abs(frameLev.Width * dblFactorW)
-
-        FrameLevfiler.Top = System.Math.Abs(frameLev.Top + frameLev.Height + 10)
-        FrameLevfiler.Height = System.Math.Abs(frameCmd.Height * 0.57)
-        lstFiles.Height = System.Math.Abs(FrameLevfiler.Height * (dblFactorH + 0.01))
-        FrameLevfiler.Width = frameLev.Width
-        lstFiles.Width = lstLev.Width
-
-    End Sub
-
-    Private Sub frmMain_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
-
-        GetSaveWindowsPreferences("Save", Me)
-
-    End Sub
-
-    Private Sub frmMain_Activated(sender As Object, e As EventArgs) Handles Me.Activated
-        On Error GoTo EH
-
-        Me.Text = "PrisTrygg.  Version : " & Application.ProductVersion
-
-
-        '-- Om inte alla registervärden är satta så visa fönster med inställningar
-        '-- "frmParameters". Om vi kommer i retur från "frmParameters" via "Avbryt-knappen"
-        '-- och nödvändiga registervärden inte är satta så meddelas detta till användaren
-        '-- vars enda valmöjligheter är att avsluta programmet eller gå till inställningar.
-
-        If Not RegAppDirExist() Then
-            If Not DirExist("C:\" & APPNAME) Then MkDir("C:\" & APPNAME)
-            If Not DirExist("C:\" & APPNAME & "\Mall") Then MkDir("C:\" & APPNAME & "\Mall")
-            If Not DirExist("C:\" & APPNAME & "\In") Then MkDir("C:\" & APPNAME & "\In")
-            If Not DirExist("C:\" & APPNAME & "\Ut") Then MkDir("C:\" & APPNAME & "\Ut")
-            Call SetRegistryValues()
-        End If
-
-        '-- Kommer från frmSupplierTemplate. Registervärden redan satta.
-        If Me.Tag = "LEV" Then
-            Me.Tag = ""
-        Else
-            If Not ReitriveRegEditSettings() Then
-                'Valt "Avbryt" i inställningar.
-                If Me.Tag = "CANCEL" Then
-                    Me.Tag = ""
-
-                    '-- Knappen "Avsluta" och menyn klickbar.
-                    MsgBox("Nödvändiga registervärden ej satta!", vbInformation, APPNAME)
-
-                    Exit Sub
-                Else
-                    '-- Fönster med inställningar visas.
-                    FrmParameters.Show()
-                    FrmParameters.BringToFront()
-                    Exit Sub
-                End If
-            End If
-        End If
-
-        UpdateListboxes()
-
-        Exit Sub
-
-EH:
-        MsgBox("Ett fel har inträffat." & vbCrLf & "Felbeskrivning :  " & Err.Description, vbInformation, APPNAME)
-
-    End Sub
 
 
     Public Sub UpdateListboxes()
@@ -1053,9 +1181,8 @@ EH:
             lsIntern = ""
         End If
 
-        cLev = New clsSupplier
+        '2020-08-10 cLev = New clsSupplier
         If Not cLev.CreatePosts(lsIntern) Then Exit Sub
-        FrmVerifyInfile.Tag = sTryggFile
         FrmVerifyInfile.Tag = FixDirStr(APP_DIR_UTDATA) & sTryggFile
         FrmVerifyInfile.Show()
 
@@ -1231,6 +1358,7 @@ EH:
                             cLev.Post(MALL_POST(J)).Value = Trim(Mid(lsBuffer, cLev.Post(MALL_POST(J)).StartPos, cLev.Post(MALL_POST(J)).Length))
                         End If
 
+                        b = True
                         If b = False Then
                             '-- Kontroll numeriskt fält.
                             If cLev.Post(MALL_POST(J)).FINFO_DataFormat = FORMAT_NUMERIC Then
@@ -1322,11 +1450,9 @@ EH:
         Dim STLNRA As String
 
         '-- Denna måste ändras då nya fält tillkommer i EXTERN.ini
-        '-- Borde inte hårdkodas
-        '2005-03-29 tar bort hårdkodningen
-        Dim lsConvertedData As String '2005-03-29 * 751 '591
+        Dim lsConvertedData As String
         Dim RV As Long
-        Dim lRecordLength As Long '2005-03-29
+        Dim lRecordLength As Long
         Dim lNoOfRecords As Long
 
         On Error GoTo EH
@@ -1339,7 +1465,7 @@ EH:
         lsData = ""
 
         '-- Om det är en excel-fil från leverantören sätts [bExcel] = TRUE.
-        If cLev.FileFormat = FILE_EXCEL_ANSI Or cLev.FileFormat = FILE_EXCEL_DOS Then
+        If cLev.FileFormat = FILE_EXCEL_ANSI Or cLev.FileFormat = FILE_EXCEL_ANSI_OLD Or cLev.FileFormat = FILE_EXCEL_DOS Then
             bExcel = True
             cString = New clsString
         End If
@@ -1500,8 +1626,8 @@ EH:
                 Next J
 
                 '-- Konvertera till DOS-format om infil = ANSI.
-                If cLev.FileFormat = FILE_ANSI Or cLev.FileFormat = FILE_EXCEL_ANSI Then
-                    lsConvertedData = Space(lRecordLength) '2005-03-29
+                If cLev.FileFormat = FILE_EXCEL_ANSI Or cLev.FileFormat = FILE_EXCEL_ANSI_OLD Or cLev.FileFormat = FILE_EXCEL_DOS Then
+                    lsConvertedData = Space(lRecordLength)
                     RV = CharToOem(STLNRA & lsData, lsConvertedData)
                     '-- Om infil = DOS, ingen åtgärd.
                 ElseIf cLev.FileFormat = FILE_DOS Or cLev.FileFormat = FILE_EXCEL_DOS Then
@@ -1513,7 +1639,7 @@ EH:
 
 
                 '-- Skriv utdatarecord.
-                Print(FnrOut, lsConvertedData)
+                PrintLine(FnrOut, lsConvertedData)
                 lsData = ""
             End If
 
@@ -1570,6 +1696,21 @@ errorHandle:
 
     End Sub
 
+    Private Sub copySupplierTemplate()
+
+        Dim sFilename As String
+        Dim sFilenameOut As String
+
+        sFilename = lstLev.SelectedItem.Text
+
+        sFilenameOut = InputBox("Ange namn på den nya filen", "Filnman", sFilename)
+        sFilenameOut = FixDirStr(APP_DIR_MALL) & sFilenameOut
+        sFilename = FixDirStr(APP_DIR_MALL) & sFilename
+        FileCopy(sFilename, sFilenameOut)
+        UpdateListboxes()
+
+    End Sub
+
     Public Sub writeCounter(Optional bInitiate As Boolean = False,
                             Optional lMaxRecords As Long = 0,
                             Optional bCloseCounter As Boolean = False)
@@ -1581,11 +1722,11 @@ errorHandle:
         Else
             If bInitiate = True Then
                 txtProgressBar.Text = ""
-                txtProgressBar.Visibility = Telerik.WinControls.ElementVisibility.Visible
                 progressBarElement.Value1 = 0
                 progressBarElement.Minimum = 0
                 progressBarElement.Maximum = lMaxRecords
                 txtProgressBar.Visibility = Telerik.WinControls.ElementVisibility.Visible
+                progressBarElement.Visibility = Telerik.WinControls.ElementVisibility.Visible
             Else
                 If progressBarElement.Visibility = Telerik.WinControls.ElementVisibility.Visible Then
                     If progressBarElement.Value1 < progressBarElement.Maximum Then
@@ -1599,13 +1740,99 @@ errorHandle:
 
     End Sub
 
-    Private Sub chkVerifiering_ToggleStateChanged(sender As Object, args As Telerik.WinControls.UI.StateChangedEventArgs) Handles chkVerifiering.ToggleStateChanged
+    Private Sub getTheme()
 
-        If args.ToggleState = Telerik.WinControls.Enumerations.ToggleState.Off Then
-            cmdTransfer.Text = "Skapa fil till Trygg"
-        Else
-            cmdTransfer.Text = "Verifiera infilen"
+        Dim themesItem As RadListDataItem
+        Dim s As String
+        Dim sTheme As String
+        Dim i As Integer
+
+        On Error Resume Next
+
+        themesItem = New RadListDataItem
+        themesItem.Text = "Crystal"
+        mnuThemes.Items.Add(themesItem)
+        themesItem = New RadListDataItem
+        themesItem.Text = "CrystalDark"
+        mnuThemes.Items.Add(themesItem)
+        themesItem = New RadListDataItem
+        themesItem.Text = "Fluent"
+        mnuThemes.Items.Add(themesItem)
+        themesItem = New RadListDataItem
+        themesItem.Text = "FluentDark"
+        mnuThemes.Items.Add(themesItem)
+        themesItem = New RadListDataItem
+        themesItem.Text = "Office2013Dark"
+        mnuThemes.Items.Add(themesItem)
+        themesItem = New RadListDataItem
+        themesItem.Text = "Office2013Light"
+        mnuThemes.Items.Add(themesItem)
+        themesItem = New RadListDataItem
+        themesItem.Text = "Windows8"
+        mnuThemes.Items.Add(themesItem)
+        themesItem = New RadListDataItem
+        themesItem.Text = "VisualStudio2012Dark"
+        mnuThemes.Items.Add(themesItem)
+        themesItem = New RadListDataItem
+        themesItem.Text = "VisualStudio2012Light"
+        mnuThemes.Items.Add(themesItem)
+        themesItem = New RadListDataItem
+        themesItem.Text = "TelerikMetroBlue"
+        mnuThemes.Items.Add(themesItem)
+        themesItem = New RadListDataItem
+        themesItem.Text = "Office2010Black"
+        mnuThemes.Items.Add(themesItem)
+        themesItem = New RadListDataItem
+        themesItem.Text = "Office2010Silver"
+        mnuThemes.Items.Add(themesItem)
+        themesItem = New RadListDataItem
+        themesItem.Text = "Office2010Blue"
+        mnuThemes.Items.Add(themesItem)
+        themesItem = New RadListDataItem
+        themesItem.Text = "ControlDefault"
+        mnuThemes.Items.Add(themesItem)
+        themesItem = New RadListDataItem
+        themesItem.Text = "Aqua"
+        mnuThemes.Items.Add(themesItem)
+        themesItem = New RadListDataItem
+        themesItem.Text = "Breeze"
+        mnuThemes.Items.Add(themesItem)
+        themesItem = New RadListDataItem
+        themesItem.Text = "Desert"
+        mnuThemes.Items.Add(themesItem)
+        themesItem = New RadListDataItem
+        themesItem.Text = "HighContrastBlack"
+        mnuThemes.Items.Add(themesItem)
+        themesItem = New RadListDataItem
+        themesItem.Text = "Office2007Black"
+        mnuThemes.Items.Add(themesItem)
+        themesItem = New RadListDataItem
+        themesItem.Text = "Office2007Silver"
+        mnuThemes.Items.Add(themesItem)
+        themesItem = New RadListDataItem
+        themesItem.Text = "Windows7"
+        mnuThemes.Items.Add(themesItem)
+
+        s = APP_NAME & "\" & Me.Name
+        sTheme = oWshShell.RegRead(s & "Theme")
+        If sTheme = String.Empty Then
+            sTheme = "Office2010Blue"
+            oWshShell.RegWrite(s & "Theme", sTheme)
         End If
+
+        i = 0
+        For Each themesItem In mnuThemes.Items
+            If themesItem.Text = sTheme Then
+                mnuThemes.Text = sTheme
+                mnuThemes.ComboBoxElement.SelectedIndex = i
+                Exit For
+            End If
+            i += 1
+        Next
+
+        ThemeResolutionService.ApplicationThemeName = sTheme
+
+        On Error GoTo 0
 
     End Sub
 

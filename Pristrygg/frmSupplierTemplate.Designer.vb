@@ -23,6 +23,7 @@ Partial Class FrmSupplierTemplate
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Dim TableViewDefinition1 As Telerik.WinControls.UI.TableViewDefinition = New Telerik.WinControls.UI.TableViewDefinition()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(FrmSupplierTemplate))
         Me.fraPost = New Telerik.WinControls.UI.RadGroupBox()
         Me.grdFields = New Telerik.WinControls.UI.RadGridView()
         Me.cmdCancel = New Telerik.WinControls.UI.RadButton()
@@ -308,6 +309,7 @@ Partial Class FrmSupplierTemplate
         Me.ClientSize = New System.Drawing.Size(919, 618)
         Me.Controls.Add(Me.fraPost)
         Me.Controls.Add(Me.RadGroupBox1)
+        Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.Name = "FrmSupplierTemplate"
         '
         '

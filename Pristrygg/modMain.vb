@@ -27,11 +27,14 @@ Module modMain
 
     'Public Const NUMBER_OF_POSTS As integer = 16
 
-    Public Const FILE_EXCEL_ANSI As String = "EXCEL-ANSI"
+    Public Const FILE_EXCEL_ANSI As String = "Excel"
     Public Const FILE_EXCEL_DOS As String = "EXCEL-DOS"
-    Public Const FILE_ANSI As String = "ANSI"
-    Public Const FILE_DOS As String = "DOS"
+    Public Const FILE_ANSI As String = "Normal textfil"
+    Public Const FILE_DOS As String = "Gammal textfil"
     Public Const FILE_CSV As String = "Semikolonseparerad"
+    Public Const FILE_EXCEL_ANSI_OLD As String = "EXCEL-ANSI"
+    Public Const FILE_ANSI_OLD As String = "WINDOWS"
+    Public Const FILE_DOS_OLD As String = "DOS"
     Public Const FILE_FINFO As String = "FINFO"
 
     Public Const ALIGNMENT_LEFT As Byte = 1
@@ -235,9 +238,9 @@ Module modMain
         Dim oGrid As RadGridView
         Dim oColumn As GridViewDataColumn
 
-        Try
+        On Error Resume Next
 
-            If frm Is Nothing Then
+        If frm Is Nothing Then
                 Exit Sub
             End If
 
@@ -279,59 +282,72 @@ Module modMain
                             End If
                         Next
                     End If
-                Next ctl
+                If sCtlType = "RadGridView" Then
+                    'Save the columns width
+                    oGrid = ctl
+                    For Each oColumn In oGrid.Columns
+                        s = sOrg & oGrid.Name & "_" & oColumn.Name & "\" & COLUMN_POS_KEY & "\"
+                        oWshShell.RegWrite(s & "Width", oColumn.Width)
+                    Next
+                End If
+            Next ctl
 
-                Exit Try
-            End If
+            Exit Sub
+        End If
 
             '----------------------------------------------------------
             ' Get:  If no coordinates were saved, center the screen;
             ' otherwise, get the last window position.
             '----------------------------------------------------------
             If oWshShell.RegRead(s & "Maximized") = String.Empty Then
-        Else
-            If oWshShell.RegRead(s & "Maximized") = "1" Then
-                frm.WindowState = FormWindowState.Maximized
-            End If
-        End If
-
-        If IsNothing(oWshShell.RegRead(s & "Left")) Then
-
-        Else
-            If frm.WindowState <> FormWindowState.Maximized Then
-                frm.Left = oWshShell.RegRead(s & "Left")
-                frm.Top = oWshShell.RegRead(s & "Top")
-                frm.Width = oWshShell.RegRead(s & "Width")
-                frm.Height = oWshShell.RegRead(s & "Height")
+            Else
+                If oWshShell.RegRead(s & "Maximized") = "1" Then
+                    frm.WindowState = FormWindowState.Maximized
+                End If
             End If
 
-            'Set all frames too
-            sOrg = s
-            For Each ctl In frm.Controls
-                sCtlType = TypeName(ctl)
-                If sCtlType = "RadGroupBox" Then
-                    For Each ctlGroup In ctl.Controls
-                        sCtlType = TypeName(ctlGroup)
-                        If sCtlType = "RadGridView" Then
-                            oGrid = ctlGroup
-                            'Get the columns
-                            For Each oColumn In oGrid.Columns
-                                s = sOrg & oGrid.Name & "_" & oColumn.Name & "\" & COLUMN_POS_KEY & "\"
-                                oColumn.Width = oWshShell.Regread(s & "Width")
-                            Next
-                            ctlGroup = oGrid
-                        End If
+            If IsNothing(oWshShell.RegRead(s & "Left")) Then
+
+            Else
+                If frm.WindowState <> FormWindowState.Maximized Then
+                    frm.Left = oWshShell.RegRead(s & "Left")
+                    frm.Top = oWshShell.RegRead(s & "Top")
+                    frm.Width = oWshShell.RegRead(s & "Width")
+                    frm.Height = oWshShell.RegRead(s & "Height")
+                End If
+
+                'Set all frames too
+                sOrg = s
+                For Each ctl In frm.Controls
+                    sCtlType = TypeName(ctl)
+                    If sCtlType = "RadGroupBox" Then
+                        For Each ctlGroup In ctl.Controls
+                            sCtlType = TypeName(ctlGroup)
+                            If sCtlType = "RadGridView" Then
+                                oGrid = ctlGroup
+                                'Get the columns
+                                For Each oColumn In oGrid.Columns
+                                    s = sOrg & oGrid.Name & "_" & oColumn.Name & "\" & COLUMN_POS_KEY & "\"
+                                    oColumn.Width = oWshShell.Regread(s & "Width")
+                                Next
+                                ctlGroup = oGrid
+                            End If
+                        Next
+                    End If
+                If sCtlType = "RadGridView" Then
+                    oGrid = ctl
+                    'Get the columns
+                    For Each oColumn In oGrid.Columns
+                        s = sOrg & oGrid.Name & "_" & oColumn.Name & "\" & COLUMN_POS_KEY & "\"
+                        oColumn.Width = oWshShell.Regread(s & "Width")
                     Next
+                    ctl = oGrid
                 End If
             Next ctl
 
         End If
 
-
-        Catch ex As Exception
-            MsgBox("fel vid laddningen av fält. Felet är" & ex.Message)
-
-        End Try
+        On Error GoTo 0
 
     End Sub
 
