@@ -68,6 +68,7 @@
         cRegEdit.AddValue(lsKey, REG_VALUENAME_UTDATA_DIR, txtOutputDir.Text)
         cRegEdit.AddValue(lsKey, REG_VALUENAME_MALL_DIR, txtMallDir.Text)
         cRegEdit.AddValue(lsKey, REG_VALUENAME_AS400_DIR, txtAS400Dir.Text)
+        cRegEdit.AddValue(lsKey, REG_VALUENAME_ONE_FILE, chkOneFile.CheckState)
 
         Me.Close()
 
@@ -85,12 +86,12 @@ EH:
     '-- ====================================================================================
 
     Private Sub FrmParameters_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        On Error Resume Next
 
         txtInputDir.Text = APP_DIR_INDATA
         txtOutputDir.Text = APP_DIR_UTDATA
         txtMallDir.Text = APP_DIR_MALL
         txtAS400Dir.Text = APP_DIR_AS400
+        chkOneFile.Checked = (APP_ONE_FILE = "1")
 
     End Sub
 

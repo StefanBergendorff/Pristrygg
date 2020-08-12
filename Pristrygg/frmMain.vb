@@ -205,8 +205,11 @@ Public Class frmMain
         ' 3. Om fillängden = APP_VILMA_LANGD ar det en Vilma-fil
         ' 4. Om fillängden = APP_VILMA2_LANGD ar det en Vilma-fil 2012-01-30
         '2019-01-14
-        'Observera att Vilma1 2.1 har exakt lika lång postlängd - 1508 tecken som en Vilma2 fil.
+        'Observera att Vilma1 2.1 har exakt lika lång postlängd, 1508 tecken, som en Vilma2 fil.
         'Därför måste en fråga ställas om det är en Vilma2, eller en Vilma1 som efterfrågas.
+        '2020-08-12
+        'Future development in Trygg make it possible to send all files without checking what type it is to Trygg.
+        'Is found in APP_ONE_FILE. APP_ONE_FILE = 1 meens that Trygg can recieve all files without checking the name of the file to send
 
         Try
 
@@ -231,7 +234,7 @@ Public Class frmMain
             End If
 
             'Kolla om leverantör iklickad
-            If lstLev.SelectedIndex >= 0 Then
+            If lstLev.SelectedIndex > 0 Then
                 transferExtern()
             Else
                 transferFinfoVilma()
@@ -396,6 +399,11 @@ EH:
 
             lsInfil = FixDirStr(APP_DIR_INDATA) & lstFiles.SelectedItem.Text
             sTryggFile = "TRBTE00"
+
+            If APP_ONE_FILE = "1" Then
+                lsUtFil = "TRBTA00"
+            End If
+
             lsUtFil = FixDirStr(APP_DIR_UTDATA) & sTryggFile
             lsOldInFil = 0
 
@@ -569,35 +577,30 @@ EH:
                     bVilma = True
                     lPostLangd = APP_VILMA_LANGD
                 End If
-                '--->2019-01-19, kolla även med Bidcon
+                'kolla även med Bidcon
                 If Len(lsBuffer) = APP_VILMA_LANGD + APP_BIDCON_LANGD Then
                     bVilma = True
                     lPostLangd = Len(lsBuffer)
                 End If
-                '---<2019-01-19
 
-                '--->2018-09-14, då Vilma1 fått ny längd kör jag allt som är mindre än vilma2 som vilma1
+                'då Vilma1 fått ny längd kör jag allt som är mindre än vilma2 som vilma1
                 If Len(lsBuffer) < APP_VILMA2_LANGD And Len(lsBuffer) > APP_VILMA_LANGD Then
                     bVilma2 = True
                     lPostLangd = Len(lsBuffer)
                 End If
-                '---<2018-02-14
 
-                '--->2012-01-30
                 If Len(lsBuffer) = APP_VILMA2_LANGD Then
                     bVilma2 = True
                     lPostLangd = APP_VILMA2_LANGD
                 End If
-                '---<2012-01-30
 
-                '--->2018-02-14, då Vilma2 kommer med många uppdateringar i den närmaste framtiden kör jag allt som är större som vilma2
+                '--->då Vilma2 kommer med många uppdateringar i den närmaste framtiden kör jag allt som är större som vilma2
                 If Len(lsBuffer) > APP_VILMA2_LANGD Then
                     bVilma2 = True
                     lPostLangd = Len(lsBuffer)
                 End If
-                '---<2018-02-14
 
-                '--->2019-01-14, då Vilma1 1.2 har exakt lika lång postlängd som Vilma2 måste jag ställa en fråga vilken fil det är
+                '--->då Vilma1 1.2 har exakt lika lång postlängd som Vilma2 måste jag ställa en fråga vilken fil det är
                 If Len(lsBuffer) = APP_VILMA2_LANGD Or Len(lsBuffer) = APP_VILMA2_LANGD + APP_BIDCON_LANGD Then
                     s = "Det går inte att avgöra om detta är en Vilma2 fil, eller en Vilma1 fil."
                     s = s & vbCrLf
@@ -619,9 +622,8 @@ EH:
                     End Select
                     lPostLangd = Len(lsBuffer)
                 End If
-                '---<2018-02-14
 
-                '--->2013-03-07, ser efter om det är en fil med BidCon-uppgifter
+                '--->ser efter om det är en fil med BidCon-uppgifter
                 If APP_BIDCON_LANGD > 0 Then
                     '--->2019-01-14, gör det lite lättare
                     If 1 = 1 Then
@@ -683,12 +685,15 @@ EH:
             lsUtFil = "TRBTW00"
         End If
 
-        '--->2013-03-07, nya filnamn för BidCon
+        '--->nya filnamn för BidCon
         If bBidCon = True Then
             'byta ut filnamnet till filnamnet enligt BidCon
             lsUtFil = "TRBI" & Mid(lsUtFil, 5, Len(lsUtFil))
         End If
-        '---<2013-03-07
+
+        If APP_ONE_FILE = "1" Then
+            lsUtFil = "TRBTA00"
+        End If
 
         sTryggFile = lsUtFil
         lsUtFil = FixDirStr(APP_DIR_UTDATA) & lsUtFil
@@ -1018,9 +1023,11 @@ EH:
                 APP_FINFO_LANGD = cRegEdit.RetriveValue(lsKey, REG_VALUENAME_FINFO_LANGD)
                 If Len(APP_FINFO_LANGD) = 0 Then
                     APP_FINFO_LANGD = "548"
+                    cRegEdit.AddValue(lsKey, REG_VALUENAME_FINFO_LANGD, APP_FINFO_LANGD)
                 End If
             Else
                 APP_FINFO_LANGD = "548"
+                cRegEdit.AddValue(lsKey, REG_VALUENAME_FINFO_LANGD, APP_FINFO_LANGD)
             End If
 
             '-- VILMA-längden
@@ -1028,48 +1035,64 @@ EH:
                 APP_VILMA_LANGD = cRegEdit.RetriveValue(lsKey, REG_VALUENAME_VILMA_LANGD)
                 If Len(APP_VILMA_LANGD) = 0 Then
                     APP_VILMA_LANGD = "717"
+                    cRegEdit.AddValue(lsKey, REG_VALUENAME_VILMA_LANGD, APP_VILMA_LANGD)
                 End If
             Else
                 APP_VILMA_LANGD = "717"
+                cRegEdit.AddValue(lsKey, REG_VALUENAME_VILMA_LANGD, APP_VILMA_LANGD)
             End If
 
-            '--->2012-01-30
             '-- VILMA2-längden
             If cRegEdit.ValueExist(lsKey, REG_VALUENAME_VILMA2_LANGD) Then
                 APP_VILMA2_LANGD = cRegEdit.RetriveValue(lsKey, REG_VALUENAME_VILMA2_LANGD)
                 If Len(APP_VILMA2_LANGD) = 0 Then
                     APP_VILMA2_LANGD = "1508"
+                    cRegEdit.AddValue(lsKey, REG_VALUENAME_VILMA2_LANGD, APP_VILMA2_LANGD)
                 End If
             Else
                 APP_VILMA2_LANGD = "1508"
+                cRegEdit.AddValue(lsKey, REG_VALUENAME_VILMA2_LANGD, APP_VILMA2_LANGD)
             End If
+
             '-- VILMA2-flagga
             If cRegEdit.ValueExist(lsKey, REG_VALUENAME_VILMA2_FLAG) Then
                 APP_VILMA2_FLAG = cRegEdit.RetriveValue(lsKey, REG_VALUENAME_VILMA2_FLAG)
                 If Len(Trim(APP_VILMA2_FLAG)) = 0 Then
-                    APP_VILMA2_FLAG = "0"
+                    APP_VILMA2_FLAG = "1"
+                    cRegEdit.AddValue(lsKey, REG_VALUENAME_VILMA2_FLAG, APP_VILMA2_FLAG)
                 End If
                 If Len(Trim(APP_VILMA2_FLAG)) > 1 Then
-                    APP_VILMA2_FLAG = "0"
+                    APP_VILMA2_FLAG = "1"
+                    cRegEdit.AddValue(lsKey, REG_VALUENAME_VILMA2_FLAG, APP_VILMA2_FLAG)
                 End If
             Else
                 APP_VILMA2_FLAG = "1"   'Sätter den alltid till Vilma2
+                cRegEdit.AddValue(lsKey, REG_VALUENAME_VILMA2_FLAG, APP_VILMA2_FLAG)
             End If
-            '---<2012-01-30
 
-            '--->2013-03-07, längden på BidCon-fälten
+            'längden på BidCon-fälten
             If cRegEdit.ValueExist(lsKey, REG_VALUENAME_BIDCON_LANGD) Then
                 APP_BIDCON_LANGD = cRegEdit.RetriveValue(lsKey, REG_VALUENAME_BIDCON_LANGD)
                 If Len(APP_BIDCON_LANGD) = 0 Then
                     APP_BIDCON_LANGD = "29"
+                    cRegEdit.AddValue(lsKey, REG_VALUENAME_BIDCON_LANGD, APP_BIDCON_LANGD)
                 End If
             Else
                 APP_BIDCON_LANGD = "29"
+                cRegEdit.AddValue(lsKey, REG_VALUENAME_BIDCON_LANGD, APP_BIDCON_LANGD)
             End If
-            '---<2013-03-07
 
-            APP_FTP_COMMAND_BTE = ""
-            APP_FTP_COMMAND_BTF = ""
+            'One file in Trygg
+            If cRegEdit.ValueExist(lsKey, REG_VALUENAME_ONE_FILE) Then
+                APP_ONE_FILE = cRegEdit.RetriveValue(lsKey, REG_VALUENAME_ONE_FILE)
+                If Len(APP_ONE_FILE) = 0 Then
+                    APP_ONE_FILE = "0"
+                    cRegEdit.AddValue(lsKey, REG_VALUENAME_ONE_FILE, APP_ONE_FILE)
+                End If
+            Else
+                APP_ONE_FILE = "0"
+                cRegEdit.AddValue(lsKey, REG_VALUENAME_ONE_FILE, APP_ONE_FILE)
+            End If
         Else
             '-- Skapa nyckel.
             cRegEdit.AddKey(lsKey)
@@ -1081,9 +1104,6 @@ EH:
         Exit Function
 
 EH:
-        'Err.Raise Number:=Err.Number,
-        'Source:="ReitriveRegEditSettings",
-        'Description:=Err.Description
 
     End Function
 
@@ -1817,6 +1837,7 @@ errorHandle:
         sTheme = oWshShell.RegRead(s & "Theme")
         If sTheme = String.Empty Then
             sTheme = "Office2010Blue"
+            sTheme = "ControlDefault"
             oWshShell.RegWrite(s & "Theme", sTheme)
         End If
 

@@ -34,6 +34,8 @@ Partial Class FrmParameters
         Me.RadLabel1 = New Telerik.WinControls.UI.RadLabel()
         Me.cmdSave = New Telerik.WinControls.UI.RadButton()
         Me.cmdCancel = New Telerik.WinControls.UI.RadButton()
+        Me.RadGroupBox2 = New Telerik.WinControls.UI.RadGroupBox()
+        Me.chkOneFile = New Telerik.WinControls.UI.RadCheckBox()
         CType(Me.RadGroupBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.RadGroupBox1.SuspendLayout()
         CType(Me.txtAS400Dir, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -46,6 +48,9 @@ Partial Class FrmParameters
         CType(Me.RadLabel1, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.cmdSave, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.cmdCancel, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.RadGroupBox2, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.RadGroupBox2.SuspendLayout()
+        CType(Me.chkOneFile, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -65,7 +70,7 @@ Partial Class FrmParameters
         Me.RadGroupBox1.HeaderText = "Sökvägar"
         Me.RadGroupBox1.Location = New System.Drawing.Point(13, 13)
         Me.RadGroupBox1.Name = "RadGroupBox1"
-        Me.RadGroupBox1.Size = New System.Drawing.Size(593, 146)
+        Me.RadGroupBox1.Size = New System.Drawing.Size(630, 146)
         Me.RadGroupBox1.TabIndex = 0
         Me.RadGroupBox1.Text = "Sökvägar"
         '
@@ -75,7 +80,7 @@ Partial Class FrmParameters
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.txtAS400Dir.Location = New System.Drawing.Point(126, 100)
         Me.txtAS400Dir.Name = "txtAS400Dir"
-        Me.txtAS400Dir.Size = New System.Drawing.Size(449, 20)
+        Me.txtAS400Dir.Size = New System.Drawing.Size(486, 20)
         Me.txtAS400Dir.TabIndex = 7
         '
         'txtOutputDir
@@ -84,7 +89,7 @@ Partial Class FrmParameters
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.txtOutputDir.Location = New System.Drawing.Point(126, 74)
         Me.txtOutputDir.Name = "txtOutputDir"
-        Me.txtOutputDir.Size = New System.Drawing.Size(449, 20)
+        Me.txtOutputDir.Size = New System.Drawing.Size(486, 20)
         Me.txtOutputDir.TabIndex = 6
         '
         'txtInputDir
@@ -93,7 +98,7 @@ Partial Class FrmParameters
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.txtInputDir.Location = New System.Drawing.Point(126, 48)
         Me.txtInputDir.Name = "txtInputDir"
-        Me.txtInputDir.Size = New System.Drawing.Size(449, 20)
+        Me.txtInputDir.Size = New System.Drawing.Size(486, 20)
         Me.txtInputDir.TabIndex = 5
         '
         'txtMallDir
@@ -102,7 +107,7 @@ Partial Class FrmParameters
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.txtMallDir.Location = New System.Drawing.Point(126, 22)
         Me.txtMallDir.Name = "txtMallDir"
-        Me.txtMallDir.Size = New System.Drawing.Size(449, 20)
+        Me.txtMallDir.Size = New System.Drawing.Size(486, 20)
         Me.txtMallDir.TabIndex = 4
         '
         'RadLabel4
@@ -140,7 +145,7 @@ Partial Class FrmParameters
         'cmdSave
         '
         Me.cmdSave.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.cmdSave.Location = New System.Drawing.Point(367, 181)
+        Me.cmdSave.Location = New System.Drawing.Point(404, 268)
         Me.cmdSave.Name = "cmdSave"
         Me.cmdSave.Size = New System.Drawing.Size(110, 24)
         Me.cmdSave.TabIndex = 1
@@ -149,17 +154,39 @@ Partial Class FrmParameters
         'cmdCancel
         '
         Me.cmdCancel.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.cmdCancel.Location = New System.Drawing.Point(496, 181)
+        Me.cmdCancel.Location = New System.Drawing.Point(533, 268)
         Me.cmdCancel.Name = "cmdCancel"
         Me.cmdCancel.Size = New System.Drawing.Size(110, 24)
         Me.cmdCancel.TabIndex = 2
         Me.cmdCancel.Text = "&Avbryt"
         '
+        'RadGroupBox2
+        '
+        Me.RadGroupBox2.AccessibleRole = System.Windows.Forms.AccessibleRole.Grouping
+        Me.RadGroupBox2.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.RadGroupBox2.Controls.Add(Me.chkOneFile)
+        Me.RadGroupBox2.HeaderText = "Övriga uppgifter"
+        Me.RadGroupBox2.Location = New System.Drawing.Point(10, 165)
+        Me.RadGroupBox2.Name = "RadGroupBox2"
+        Me.RadGroupBox2.Size = New System.Drawing.Size(630, 73)
+        Me.RadGroupBox2.TabIndex = 3
+        Me.RadGroupBox2.Text = "Övriga uppgifter"
+        '
+        'chkOneFile
+        '
+        Me.chkOneFile.Location = New System.Drawing.Point(9, 22)
+        Me.chkOneFile.Name = "chkOneFile"
+        Me.chkOneFile.Size = New System.Drawing.Size(140, 18)
+        Me.chkOneFile.TabIndex = 0
+        Me.chkOneFile.Text = "En gemensam fil i Trygg"
+        '
         'FrmParameters
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(618, 228)
+        Me.ClientSize = New System.Drawing.Size(655, 315)
+        Me.Controls.Add(Me.RadGroupBox2)
         Me.Controls.Add(Me.cmdCancel)
         Me.Controls.Add(Me.cmdSave)
         Me.Controls.Add(Me.RadGroupBox1)
@@ -183,6 +210,10 @@ Partial Class FrmParameters
         CType(Me.RadLabel1, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.cmdSave, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.cmdCancel, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.RadGroupBox2, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.RadGroupBox2.ResumeLayout(False)
+        Me.RadGroupBox2.PerformLayout()
+        CType(Me.chkOneFile, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
 
@@ -199,5 +230,7 @@ Partial Class FrmParameters
     Friend WithEvents RadLabel1 As Telerik.WinControls.UI.RadLabel
     Friend WithEvents cmdSave As Telerik.WinControls.UI.RadButton
     Friend WithEvents cmdCancel As Telerik.WinControls.UI.RadButton
+    Friend WithEvents RadGroupBox2 As Telerik.WinControls.UI.RadGroupBox
+    Friend WithEvents chkOneFile As Telerik.WinControls.UI.RadCheckBox
 End Class
 

@@ -10,7 +10,11 @@ Module modMain
     Public oWshShell As Object                                  'Talks with the register
 
     '-- Namnet på applikationen. Anges som titel på alla messageboxar.
-    Public Const APPNAME As String = "PrisTryggRel11"
+    Public Const APPNAME As String = "PrisTryggRel8"
+
+    '-- Regedit aktuella nycklar.
+    Public Const REG_APP_KEY As String = "PrisTryggRel8"
+    Public Const REG_APP__UTV_KEY As String = "PrisTryggRel8Utv"
 
     '-- Ini-filen som definierar alla fält i Trygg.
     'Public Const INI_FILE As String = "finfo.ini"
@@ -55,17 +59,19 @@ Module modMain
     Public APP_DIR_MALL As String
     Public APP_DIR_AS400 As String
 
-    Public APP_FTP_HOST As String
-    Public APP_FTP_USER As String
-    Public APP_FTP_PW As String
-    Public APP_FTP_COMMAND_BTE As String
-    Public APP_FTP_COMMAND_BTF As String
+    'Public APP_FTP_HOST As String
+    'Public APP_FTP_USER As String
+    'Public APP_FTP_PW As String
+    'Public APP_FTP_COMMAND_BTE As String
+    'Public APP_FTP_COMMAND_BTF As String
 
     Public APP_FINFO_LANGD As String
     Public APP_VILMA_LANGD As String
-    Public APP_VILMA2_LANGD As String '2012-01-30
-    Public APP_VILMA2_FLAG As String '2012-01-30
-    Public APP_BIDCON_LANGD As String '2013-03-07
+    Public APP_VILMA2_LANGD As String
+    Public APP_VILMA2_FLAG As String
+    Public APP_BIDCON_LANGD As String
+
+    Public APP_ONE_FILE As String
 
     '-- En array med längden = "antalet mallfält" som innehåller vilka rader i filen
     '-- som ska vara mallfält.
@@ -76,10 +82,6 @@ Module modMain
     'Public Const REG_MAIN_KEY = "HKEY_LOCAL_MACHINE\SOFTWARE\Sema"
     Public Const REG_MAIN_KEY = "HKEY_CURRENT_USER\Software"
 
-    '-- Regedit aktuella nycklar.
-    Public Const REG_APP_KEY As String = "PrisTryggRel11"
-    Public Const REG_APP__UTV_KEY As String = "PrisTryggRel8Utv"
-
 
     '-- Regedit aktuella namn på värden.
     Public Const REG_VALUENAME_CREATED As String = "DirCreated"
@@ -88,17 +90,19 @@ Module modMain
     Public Const REG_VALUENAME_MALL_DIR As String = "Template Directory"
     Public Const REG_VALUENAME_AS400_DIR As String = "AS 400 Directory"
 
-    Public Const REG_VALUENAME_FTP_HOST As String = "FTP Host"
-    Public Const REG_VALUENAME_FTP_USER As String = "FTP User"
-    Public Const REG_VALUENAME_FTP_PW As String = "FTP Password"  '-- KRYPTERAS ????????
-    Public Const REG_VALUENAME_FTP_COMMAND_BTE As String = "FTP Command BTE"
-    Public Const REG_VALUENAME_FTP_COMMAND_BTF As String = "FTP Command BTF"
+    'Public Const REG_VALUENAME_FTP_HOST As String = "FTP Host"
+    'Public Const REG_VALUENAME_FTP_USER As String = "FTP User"
+    'Public Const REG_VALUENAME_FTP_PW As String = "FTP Password"  '-- KRYPTERAS ????????
+    'Public Const REG_VALUENAME_FTP_COMMAND_BTE As String = "FTP Command BTE"
+    'Public Const REG_VALUENAME_FTP_COMMAND_BTF As String = "FTP Command BTF"
 
     Public Const REG_VALUENAME_FINFO_LANGD As String = "FINFO postlängd"
     Public Const REG_VALUENAME_VILMA_LANGD As String = "VILMA postlängd"
     Public Const REG_VALUENAME_VILMA2_LANGD As String = "VILMA2 postlängd"
     Public Const REG_VALUENAME_VILMA2_FLAG As String = "VILMA2 flagga"
     Public Const REG_VALUENAME_BIDCON_LANGD As String = "BIDCON fältlängd"  '2013-03-07
+
+    Public Const REG_VALUENAME_ONE_FILE As String = "En gemensam fil"
 
 
     Public Const ERR_FILE_ISCREATED = vbObjectError + 900
