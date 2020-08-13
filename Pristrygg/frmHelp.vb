@@ -1,4 +1,6 @@
-﻿Public Class FrmHelp
+﻿Imports System.ComponentModel
+
+Public Class FrmHelp
 
     Private meLAntalDecimaler As Integer
 
@@ -14,6 +16,8 @@
     Private Sub FrmHelp_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
         Dim s As String
+
+        GetSaveWindowsPreferences("Get", Me)
 
         s = "Om det förekommer decimaltecken i talet (punkt, eller komma-tecken) ska [-1] anges." & vbCrLf
         s = s & "[-1] ska även anges om talet inte innehåller några decimaler i leverantörsfilen." & vbCrLf
@@ -46,6 +50,12 @@
         s = s & "Tillåtna omräkningstal är: -1 0,001 0,01 0,1 1 10 100 1000"
 
         lblHelp.Text = s
+
+    End Sub
+
+    Private Sub FrmHelp_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
+
+        GetSaveWindowsPreferences("Save", Me)
 
     End Sub
 End Class

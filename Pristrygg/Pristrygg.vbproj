@@ -240,6 +240,18 @@
     <Compile Include="clsSupplier.vb" />
     <Compile Include="colcollection.vb" />
     <Compile Include="ExcelColumns.vb" />
+    <Compile Include="frmAbout.Designer.vb">
+      <DependentUpon>frmAbout.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmAbout.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmAllHelp.Designer.vb">
+      <DependentUpon>frmAllHelp.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmAllHelp.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmHelp.Designer.vb">
       <DependentUpon>frmHelp.vb</DependentUpon>
     </Compile>
@@ -289,6 +301,12 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="frmAbout.resx">
+      <DependentUpon>frmAbout.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmAllHelp.resx">
+      <DependentUpon>frmAllHelp.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmHelp.resx">
       <DependentUpon>frmHelp.vb</DependentUpon>
     </EmbeddedResource>

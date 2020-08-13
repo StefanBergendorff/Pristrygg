@@ -44,7 +44,7 @@ Public Class FrmVerifyInfile
                 Exit Sub
             End If
             args.Cancel = String.IsNullOrEmpty(args.NewValue)
-            If args.Cancel = False Then
+            If args.Cancel = False And args.NewValue <> "" Then
                 i = CInt(args.NewValue)
             End If
 
@@ -54,6 +54,30 @@ Public Class FrmVerifyInfile
 
         If args.Cancel = True Then
             MsgBox("Fyll i ett heltal för antalet poster som ska hämtas!")
+        End If
+
+    End Sub
+
+    Private Sub txtStartRecord_TextChanged(sender As Object, e As EventArgs) Handles txtStartRecord.TextChanged
+
+        Dim args = TryCast(e, TextChangingEventArgs)
+        Dim i As Integer
+
+        Try
+            If args Is Nothing Then
+                Exit Sub
+            End If
+            args.Cancel = String.IsNullOrEmpty(args.NewValue)
+            If args.Cancel = False And args.NewValue <> "" Then
+                i = CInt(args.NewValue)
+            End If
+
+        Catch ex As Exception
+            args.Cancel = True
+        End Try
+
+        If args.Cancel = True Then
+            MsgBox("Fyll i ett heltal för startposten!")
         End If
 
     End Sub
@@ -82,8 +106,7 @@ Public Class FrmVerifyInfile
         txtNewRecords.Text = "10"
         lastRownum = 0
         waitingAddData.Visible = False
-        'waitingAddData.ShowText = True
-        'waitingAddData.Text = "Läser..."
+        lblFill3.Visible = False
 
     End Sub
     Private Sub InitializeGrid()
@@ -92,6 +115,10 @@ Public Class FrmVerifyInfile
             grdVerify.ShowGroupPanel = False
             grdVerify.EnableGrouping = False
             grdVerify.AllowAddNewRow = False
+            grdVerify.AllowDeleteRow = False
+            grdVerify.AllowEditRow = False
+            grdVerify.ClipboardCopyMode = GridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText
+            grdVerify.MultiSelect = True
             grdVerify.AllowColumnReorder = True
             grdVerify.AutoSizeColumnsMode = GridViewAutoSizeColumnsMode.None
             'grdVerify.AutoSizeColumnsMode = GridViewAutoSizeColumnsMode.Fill
@@ -153,23 +180,39 @@ Public Class FrmVerifyInfile
         Dim lRowNo As Integer
         Dim lRowNo2 As Integer
         Dim lRowNoStart As Integer
+        Dim lRowNoToJumpTo As Integer
         Dim sRecord As String
         Dim sRecord2 As String
         Dim sValue As String
         Dim rowInfo As GridViewRowInfo
 
         Try
+
             fnr = FreeFile()
             FileOpen(fnr, Me.Tag, OpenMode.Input)
             lRowNo = 0
             lRowNo2 = 0
-            lRowNoStart = lastRownum
+            'Check and set if there is a new startrecord
+            If txtStartRecord.Text <> "" Then
+                lRowNoToJumpTo = CInt(txtStartRecord.Text)
+                lastRownum = 0
+                lRowNoStart = 0
+                txtStartRecord.Text = ""
+                grdVerify.Rows.Clear()
+                lblFill1.Visible = True
+                lblFill2.Visible = True
+                lblFill3.Visible = False
+                txtNewRecords.Visible = True
+            Else
+                lRowNoStart = lastRownum
+                lRowNoToJumpTo = -1
+            End If
 
             Do Until EOF(fnr)
                 lRowNo += 1
                 sRecord2 = LineInput(fnr)
                 'Check if some records are already read
-                If lastRownum > 0 And lastRownum >= lRowNo Then
+                If (lastRownum > 0 And lastRownum >= lRowNo) Or (lRowNoToJumpTo >= 0 And lRowNoToJumpTo >= lRowNo) Then
                     'just read next record
                 Else
                     lRowNo2 += 1
@@ -183,23 +226,35 @@ Public Class FrmVerifyInfile
                         End If
                     Next
                     If lRowNo2 = CInt(txtNewRecords.Text) Then
-                        lastRownum = lRowNo
-                        If grdVerify.Rows.Count > 1 Then
-                            grdVerify.CurrentRow = grdVerify.Rows(lRowNoStart)
-                        End If
-                        Exit Try
+                        Exit Do
                     End If
                 End If
                 Application.DoEvents()
             Loop
 
-            'If the eof is met before the coounter is reached
-            If lRowNo2 <> CInt(txtNewRecords.Text) Then
-                lastRownum = lRowNo
-                grpboxRecords.Visible = False
-            End If
-            If grdVerify.Rows.Count > 1 And lRowNoStart < grdVerify.Rows.Count Then
-                grdVerify.CurrentRow = grdVerify.Rows(lRowNoStart)
+            lastRownum = lRowNo
+
+            'Set the current row
+            If grdVerify.Rows.Count > 0 Then
+                'If the eof is met before the coounter is reached
+                If lRowNo2 <> CInt(txtNewRecords.Text) Then
+                    If lRowNo2 = 0 Then   'Is already standing at the end
+                        grdVerify.CurrentRow = grdVerify.Rows(grdVerify.Rows.Count - 1)
+                    Else
+                        grdVerify.CurrentRow = grdVerify.Rows(grdVerify.Rows.Count - lRowNo2)
+                    End If
+                    lblFill3.Left = lblFill1.Left
+                    lblFill3.Top = lblFill1.Top
+                    lblFill1.Visible = False
+                    lblFill2.Visible = False
+                    lblFill3.Visible = True
+                    txtNewRecords.Visible = False
+                Else
+                    'Have read the amount of records that was given in txtNewRecords.Text
+                    If grdVerify.Rows.Count > 0 Then
+                        grdVerify.CurrentRow = grdVerify.Rows(grdVerify.Rows.Count - CInt(txtNewRecords.Text))
+                    End If
+                End If
             End If
 
 

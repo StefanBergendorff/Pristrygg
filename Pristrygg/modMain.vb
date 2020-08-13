@@ -38,6 +38,7 @@ Module modMain
     Public Const FILE_CSV As String = "Semikolonseparerad"
     Public Const FILE_EXCEL_ANSI_OLD As String = "EXCEL-ANSI"
     Public Const FILE_ANSI_OLD As String = "WINDOWS"
+    Public Const FILE_ANSI_OLD2 As String = "ANSI"
     Public Const FILE_DOS_OLD As String = "DOS"
     Public Const FILE_FINFO As String = "FINFO"
 
@@ -523,6 +524,7 @@ EH:
             s = s & "Felnummer: " & Err.Number
             s = s & vbCrLf
             s = s & "Meddelande: " & Err.Description
+            MsgBox(s, vbInformation, APPNAME)
         End If
 
         On Error GoTo 0

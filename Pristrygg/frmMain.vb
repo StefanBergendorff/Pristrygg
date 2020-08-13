@@ -73,11 +73,11 @@ Public Class frmMain
     End Sub
 
     Private Sub mnuHelp_Click(sender As Object, e As EventArgs) Handles mnuHelp.Click
-
+        FrmAllHelp.Show()
     End Sub
 
     Private Sub mnuAbout_Click(sender As Object, e As EventArgs) Handles mnuAbout.Click
-
+        FrmAbout.Show()
     End Sub
 
     Private Sub menuRightclickChange_Click(sender As Object, e As EventArgs) Handles menuRightclickChange.Click
@@ -284,6 +284,12 @@ Public Class frmMain
         'Fill menu combo with themes
         getTheme()
 
+        'Check if Excel is installed
+        If checkExcel() = False Then
+            'Excel is not installed
+            MsgBox("Excel är inte installerat på denna dator vilket gör att inga Excelfiler kan skickas!", vbInformation, APPNAME)
+        End If
+
         'Make Some controls not visible
         progressBarElement.Value1 = 0
         progressBarElement.Visibility = Telerik.WinControls.ElementVisibility.Hidden
@@ -304,18 +310,8 @@ Public Class frmMain
         dblFactorW = 0.95
         dblFactorH = 0.87
 
-        frameCmd.Height = System.Math.Abs(lH * (dblFactorH + 0.15))
-
-        frameLev.Height = System.Math.Abs(frameCmd.Height * 0.4)
-        lstLev.Height = System.Math.Abs(frameLev.Height * (dblFactorH - 0.035))
-        frameLev.Width = System.Math.Abs(lW - frameCmd.Width - 30)
-        lstLev.Width = System.Math.Abs(frameLev.Width * dblFactorW)
-
-        FrameLevfiler.Top = System.Math.Abs(frameLev.Top + frameLev.Height + 10)
-        FrameLevfiler.Height = System.Math.Abs(frameCmd.Height * 0.57)
-        lstFiles.Height = System.Math.Abs(FrameLevfiler.Height * (dblFactorH + 0.01))
-        FrameLevfiler.Width = frameLev.Width
-        lstFiles.Width = lstLev.Width
+        FrameLevfiler.Left = System.Math.Abs(frameLev.Left + frameLev.Width + 10)
+        FrameLevfiler.Height = frameLev.Height
 
     End Sub
 
@@ -1181,10 +1177,6 @@ EH:
     '-- ====================================================================================
 
 
-    Private Sub mnuHelptext_Click()
-        'frmAllHelp.Show
-    End Sub
-
     Private Sub mnuVerifyTryggFile_Click()
 
         Dim lsIntern As String
@@ -1234,6 +1226,13 @@ LoadInFileStart:
 
         LoadIniFile = True
         bFileOpen = False
+        lsLevFile = ""
+
+        If lstLev.SelectedItem Is Nothing And lsLevFile = "" Then
+            LoadIniFile = False
+            On Error GoTo 0
+            Exit Function
+        End If
 
         lsLevFile = lstLev.SelectedItem.Text
 
@@ -1264,11 +1263,13 @@ LoadInFileStart:
 
         For J = 1 To cLev.NumberOfTemplatePosts
             lsBuffer = LineInput(Fnr)
-            cString.StringData = lsBuffer
-            cLev.Post(MALL_POST(J)).StartPos = cString.FindNextPipe
-            cLev.Post(MALL_POST(J)).Length = cString.FindNextPipe
-            cLev.Post(MALL_POST(J)).Divider = cString.FindNextPipe
-            cString.ResetValue()
+            If lsBuffer <> "" Then
+                cString.StringData = lsBuffer
+                cLev.Post(MALL_POST(J)).StartPos = cString.FindNextPipe
+                cLev.Post(MALL_POST(J)).Length = cString.FindNextPipe
+                cLev.Post(MALL_POST(J)).Divider = cString.FindNextPipe
+                cString.ResetValue()
+            End If
         Next J
 
         FileClose(Fnr)
@@ -1284,13 +1285,20 @@ EH:
         If bFileOpen Then FileClose(Fnr)
         '-- Input pat eof
         If Err.Number = 62 Then
-            s = "Det finns fler tillgängliga fält än vad det finns fält i mall-filen."
-            s = s & vbCrLf
-            s = s & "Ska mallfilen justeras så den passar antalet tillgängliga fält?"
-            If MsgBox(s, vbYesNo, APPNAME) = vbYes Then
-                makeMallRows(cLev.NumberOfTemplatePosts - J + 1)
+            If True Then
+                'Write new lines to the mall-file
+                makeNewMallRows(cLev.NumberOfTemplatePosts - J + 1, lsLevFile)
                 On Error GoTo 0
                 GoTo LoadInFileStart
+            Else
+                s = "Det finns fler tillgängliga fält än vad det finns fält i mall-filen."
+                s = s & vbCrLf
+                s = s & "Ska mallfilen justeras så den passar antalet tillgängliga fält?"
+                If MsgBox(s, vbYesNo, APPNAME) = vbYes Then
+                    makeMallRows(cLev.NumberOfTemplatePosts - J + 1, lsLevFile)
+                    On Error GoTo 0
+                    GoTo LoadInFileStart
+                End If
             End If
         Else
             MsgBox("Ett fel har inträffat." & vbCrLf & "Felbeskrivning :  " & Err.Description, vbInformation, APPNAME)
@@ -1690,16 +1698,13 @@ EH:
 
     End Function
 
-    Private Sub makeMallRows(lNoOfRows As Long)
+    Private Sub makeMallRows(lNoOfRows As Long, sLevFile As String)
 
         Dim l As Long
         Dim s As String
-        Dim sLevFile As String
         Dim lFileNo As Long
 
         On Error GoTo errorHandle
-
-        sLevFile = lstLev.SelectedValue
 
         If Len(sLevFile) = 0 Then
             Exit Sub
@@ -1713,6 +1718,36 @@ errorHandle:
             MsgBox("Fel vid komplettering av mall! Felet är:" & vbCrLf & Err.Description)
         End If
         On Error GoTo 0
+
+    End Sub
+
+    Private Sub makeNewMallRows(lNoOfRows As Long, sLevFile As String)
+
+        Dim lRad As Long
+        Dim sFile As String
+        Dim lFileNo As Integer
+
+        Try
+
+            If Len(sLevFile) = 0 Then
+                Exit Sub
+            End If
+
+            sFile = APP_DIR_MALL & "\" & sLevFile
+            lFileNo = FreeFile()
+            FileOpen(lFileNo, sFile, OpenMode.Append)
+
+            For lRad = 1 To lNoOfRows
+                PrintLine(lFileNo, "0|0|1")
+            Next
+
+        Catch ex As Exception
+            If Err.Description <> "" Then
+                MsgBox("Fel vid komplettering av mall! Felet är:" & vbCrLf & Err.Description)
+            End If
+        End Try
+
+        FileClose(lFileNo)
 
     End Sub
 
@@ -1856,6 +1891,23 @@ errorHandle:
         On Error GoTo 0
 
     End Sub
+
+    Private Function checkExcel() As Boolean
+
+        Dim xlApp As Excel.Application
+
+        Try
+            checkExcel = True
+            xlApp = New Excel.Application
+            If xlApp Is Nothing Then
+                checkExcel = False
+            End If
+
+        Catch ex As Exception
+            Return False
+        End Try
+
+    End Function
 
 End Class
 

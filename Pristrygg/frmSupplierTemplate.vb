@@ -101,7 +101,7 @@ Public Class FrmSupplierTemplate
                         cmbFilTyp.Text = FILE_EXCEL_ANSI
                     Case FILE_EXCEL_DOS
                         cmbFilTyp.Text = FILE_EXCEL_ANSI
-                    Case FILE_ANSI_OLD
+                    Case FILE_ANSI_OLD, FILE_ANSI_OLD2
                         cmbFilTyp.Text = FILE_ANSI
                     Case FILE_DOS_OLD
                         cmbFilTyp.Text = FILE_DOS
@@ -111,24 +111,24 @@ Public Class FrmSupplierTemplate
 
                 'Set index in filetype
                 For i = 0 To cmbFilTyp.Items.Count - 1
-                        If cmbFilTyp.Items(i).Text = cmbFilTyp.Text Then
-                            cmbFilTyp.SelectedItem = cmbFilTyp.Items(i)
-                            cmbFilTyp.SelectedIndex = i
-                            Exit For
-                        End If
-                    Next
+                    If cmbFilTyp.Items(i).Text = cmbFilTyp.Text Then
+                        cmbFilTyp.SelectedItem = cmbFilTyp.Items(i)
+                        cmbFilTyp.SelectedIndex = i
+                        Exit For
+                    End If
+                Next
 
-                    txtHeader.Text = cLev.Header
+                txtHeader.Text = cLev.Header
 
                 If cLev.FileFormat = FILE_EXCEL_ANSI Or cLev.FileFormat = FILE_EXCEL_DOS Then
                     bExcel = True
                 Else
                     bExcel = False
-                    End If
-
                 End If
 
-                Counter = 1
+            End If
+
+            Counter = 1
             lastRowIndex = -1
             SetFields()
             InitializeGrid()
@@ -236,10 +236,12 @@ Public Class FrmSupplierTemplate
         lsFileName = FixDirStr(APP_DIR_MALL) & cLev.LevNamn & ".lev"
         bUpdate = False
         If FileExists(lsFileName) Then
-            If MsgBox("Leverantören " & cLev.LevNamn & " finns redan upplagd och kommer att uppdateras." & vbCrLf &
+            If False Then
+                If MsgBox("Leverantören " & cLev.LevNamn & " finns redan upplagd och kommer att uppdateras." & vbCrLf &
                 "Vill du fortsätta ?", vbYesNo + vbQuestion, APPNAME) = vbNo Then
-                MsgBox("Ingen data sparad.", vbInformation)
-                Exit Sub
+                    MsgBox("Ingen data sparad.", vbInformation)
+                    Exit Sub
+                End If
             End If
             bUpdate = True 'Posten uppdateras
         End If
@@ -314,16 +316,16 @@ EH:
                 '    lblStartPos.Text = "Kolumn (A - FX):"
                 '    '--->2009-06-01
             ElseIf cLev.FileFormat = FILE_CSV Then 'Semikolon
-                    If cLev.Post(MALL_POST(Counter)).StartPos > 0 Then
-                        txtStartPos.Text = cLev.Post(MALL_POST(Counter)).StartPos
-                    Else
-                        txtStartPos.Text = ""
-                    End If
-                    '    lblPostLen.Text = ""
-                    '    txtPostLen.Visible = False
-                    '    lblStartPos.Text = "Fältnummer:"
-                    '    '---<2009-06-01
+                If cLev.Post(MALL_POST(Counter)).StartPos > 0 Then
+                    txtStartPos.Text = cLev.Post(MALL_POST(Counter)).StartPos
                 Else
+                    txtStartPos.Text = ""
+                End If
+                '    lblPostLen.Text = ""
+                '    txtPostLen.Visible = False
+                '    lblStartPos.Text = "Fältnummer:"
+                '    '---<2009-06-01
+            Else
                 If cLev.Post(MALL_POST(Counter)).StartPos > 0 Then
                     txtStartPos.Text = cLev.Post(MALL_POST(Counter)).StartPos
                 Else
@@ -511,7 +513,7 @@ EH:
                 End If
                 If cLev.Post(MALL_POST(j)).StartPos <> 0 Then
                     rowInfo.Cells(grdFieldsColumns.active).Value = "Ja"
-                    If InStr(cLev.FileFormat, "EXCEL") > 0 Then
+                    If InStr(UCase(cLev.FileFormat), "EXCEL") > 0 Then
                         rowInfo.Cells(grdFieldsColumns.chosenValue).Value = cExcel.ReplaceDigitWithLetter(cLev.Post(MALL_POST(j)).StartPos)
                     ElseIf cLev.FileFormat = FILE_CSV Then 'Semikolon
                         rowInfo.Cells(grdFieldsColumns.chosenValue).Value = cLev.Post(MALL_POST(j)).StartPos
@@ -524,7 +526,7 @@ EH:
                         rowInfo.Cells(grdFieldsColumns.divider).Value = ""
                     End If
                 Else
-                        rowInfo.Cells(grdFieldsColumns.active).Value = ""
+                    rowInfo.Cells(grdFieldsColumns.active).Value = ""
                     rowInfo.Cells(grdFieldsColumns.chosenValue).Value = ""
                     rowInfo.Cells(grdFieldsColumns.divider).Value = ""
                 End If
@@ -561,6 +563,10 @@ EH:
             grdFields.ShowGroupPanel = False
             grdFields.EnableGrouping = False
             grdFields.AllowAddNewRow = False
+            grdFields.AllowDeleteRow = False
+            grdFields.AllowEditRow = False
+            grdFields.ClipboardCopyMode = GridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText
+            grdFields.MultiSelect = True
             grdFields.AllowColumnReorder = True
             grdFields.AutoSizeColumnsMode = GridViewAutoSizeColumnsMode.Fill
             grdFields.ShowFilteringRow = True

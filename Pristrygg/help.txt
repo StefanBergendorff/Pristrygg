@@ -1,0 +1,133 @@
+ATT KOMMA IGÅNG :
+
+Då programmet startas för första gången kommer ett fönster som heter 'Inställningar'
+upp. Här ska tre sökvägar anges till befintliga kataloger på datorn.
+
+1. Leverantörsmallar : Den katalog där de olika mallarna lagras.
+2. Indata-katalog : Den katalog där filerna från leverantörerna ska ligga.
+3. Utdata-katalog : Den katalog där filen till Trygg tillfälligt skapas.
+4. AS400-katalog  : Den katalog där filen till Trygg skapas.
+
+Katalogen till Trygg kan skapas genom tex följande förfarande:
+På PCn ska man komma åt 400an.
+Detta kan man göra med 400ans IP-nummer, eller genom att lägga in 400an i host-tabellen under katalog c:\WINDOWS\system32\drivers\etc.
+
+Mappa upp lämplig katalog i det gemensamma filsystemet i PCn så att överföringen från PrisTrygg hamnar under rätt katalog. 
+Detta katalognamn ska även synkroniseras med parametern i Trygg.
+
+Lämplig uppmappning gör man genom att mappa upp den och inte kryssa i att den ska ansluta vid uppstart.
+Därefter drar man ut mappen till t ex skrivbordet och skapar en genväg till enheten.
+När man därefter kör PrisTrygg ska man först klicka på denna genväg för att mappa upp enheten automatiskt.
+
+
+
+FINFO.INI :
+
+Filen 'finfo.ini' ska ligga i den katalog som angetts i 'Leverantörsmallar'.
+Finfo.ini innehåller en beskrivning av samtliga fält som används av Trygg-systemet.
+Den första positionen på varje rad i filen kan vara antingen noll eller ett.
+Om den är satt till ett betyder detta att fältet ska ingå som ett fält i mallarna.
+Observera att vid ändring av detta värde måste alla upplagda mallar som gjorts innan
+ändringen göras om.
+
+
+SKAPA FIL TILL TRYGG :
+
+1. Markera den mall som ska användas i listan 'Upplagda leverantörer'.
+2. Markera filen från leverantören i listan 'Leverantörs-filer'
+3. Tryck på knappen 'Skapa fil till Trygg'
+
+Då filen till Trygg skapats får man frågan om man vill arkivera filen från
+leverantör i en underkatalog till indatakatalogen som valts i inställningar.
+Underkatalogen får namnet 'backup\ÅÅÅÅMMDD' (ÅÅÅÅMMDD = dagens datum).
+Om man svara nej ligger filen kvar i indatakatalogen.
+Filen till Trygg hamnar i utdatakatalogen som valts i inställningar
+(visas i listan 'Fil till Trygg') och får namnet 'Trygg_ÅÅÅÅMMDD_TTMMSS.txt' dår
+ÅÅÅÅMMDD = dagens datum och TTMMSS = klockslag.
+
+
+FINFO-FIL TILL TRYGG :
+
+2. Markera FINFO-filen i listan 'Leverantörs-filer'
+3. Tryck på knappen 'FINFO-FIL TILL TRYGG'
+
+I övrigt samma som 'SKAPA FIL TILL TRYGG'
+
+
+SKAPA LEVERANTÖRSMALL :
+
+1. Välj 'Leverantör' - 'Lägg upp ny leverantör' i listen längst upp.
+2. Fyll i 'Leverantörens namn' och 'Leverantörens nummer'. 'Leverantörens namn' kommer
+   att användas som namn på leverantörsmallen som skapas.
+3. Välj 'Filtyp'. Om filen från leverantören innehåller 'konstiga' Å, Ä ocg Ö så ska
+   'DOS' eller 'EXCEL-DOS' (Om det är en excel-fil) anges. 'ANSI' resp. 'EXCEL-ANSI'
+   anges om Å, Ä och Ö är normala.
+4. 'Rubrikrader i filen (antal)' sätts till det antal rader i början av filen från leverantör
+   som innehåller rubriker eller annan text som inte är artikeldata.
+5. I rutan under är det först fältet som ska definieras. Om 'Postyyp' = Text och filtypen är
+   satt till 'ANSI' eller 'DOS' ska 'Startposition' och 'Postlängd' i filen från leverantör anges.
+   Om fältet inte finns med i filen från leverantör sätts 'Startposition' till noll.
+   Är 'Filtyp' satt till 'EXCEL-DOS' eller till 'EXCEL-ANSI' finns endast fältet 'Kolumn'.
+   Här sätts vilken kolumn i excel-filen som motsvarar fältet. 
+   Om fältet inte finns med i filen från leverantör sätts 'Kolumn' till noll.
+   Om 'Postyyp' = Tal ska även 'Omräkningstal' anges. 
+   Det fungerar enligt följande :
+
+6. Då fältet är definierat, tryck på knappen 'Nästa' för att få upp nästa fält. När 
+   alla fälten är definierade, tryck på knappen 'Spara mall'. Om det redan finns
+   en mall sedan tidigare i mallkatalogen med samma namn får man frågan om man vill
+   uppdatera denna.
+
+7. Tryck på knappen 'Stäng' för att komma tillbaks till huvudfönstret. Mallen ska
+   nu ligga i listan 'Upplagda leverantörer'.
+
+
+VISA ELLER ÄNDRA I BEFINTLIG LEVERANTÖRSMALL :
+
+
+1. Markera den mall som ska visas / ändras i listan 'Upplagda leverantörer'.
+2. Välj 'Leverantör' - 'Visa / redigera befintlig leverantör' i listen längst upp.
+3. Ändringar kan nu ske enligt anvisningarna i SKAPA LEVERANTÖRSMALL.
+   Observera att om 'Leverantörens namn' ändras kommer en ny mall att skapas.
+
+
+TA BORT LEVERANTÖRSMALL :
+
+1. Markera den mall som ska tas bort i listan 'Upplagda leverantörer'.
+2. Välj 'Leverantör' - 'Ta bort leverantör' i listen längst upp.
+
+
+VERIFIERA FÄLTEN I FILEN SOM SKAPATS TILL TRYGG :
+
+1. Markera Trygg-filen i listan 'Fil till Trygg'.
+2. Välj 'Trygg' - 'Verifiera fil till Trygg' i listen längst upp.
+3. En tabell med fältnamn och den data som finns i repektive fält visas.  
+   Å, Ä och Ö ska visas med "konstiga tecken". 
+
+
+TA BORT FIL TILL TRYGG :
+
+1. Markera Trygg-filen i listan 'Fil till Trygg'.
+2. Välj 'Trygg' - 'Ta bort fil till Trygg' i listen längst upp.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

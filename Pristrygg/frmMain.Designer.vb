@@ -208,9 +208,12 @@ Partial Class frmMain
         '
         'lstLev
         '
+        Me.lstLev.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lstLev.Location = New System.Drawing.Point(15, 21)
         Me.lstLev.Name = "lstLev"
-        Me.lstLev.Size = New System.Drawing.Size(371, 137)
+        Me.lstLev.Size = New System.Drawing.Size(238, 420)
         Me.lstLev.TabIndex = 1
         '
         'chkVerifiering
@@ -231,17 +234,20 @@ Partial Class frmMain
         '
         'lstFiles
         '
+        Me.lstFiles.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lstFiles.Location = New System.Drawing.Point(15, 21)
         Me.lstFiles.Name = "lstFiles"
-        Me.lstFiles.Size = New System.Drawing.Size(421, 225)
+        Me.lstFiles.Size = New System.Drawing.Size(238, 420)
         Me.lstFiles.TabIndex = 5
         '
         'statusStrip
         '
         Me.statusStrip.Items.AddRange(New Telerik.WinControls.RadItem() {Me.txtProgressBar, Me.CommandBarSeparator1, Me.progressBarElement, Me.CommandBarSeparator2, Me.labelStatus, Me.CommandBarSeparator3, Me.labelDateTime})
-        Me.statusStrip.Location = New System.Drawing.Point(0, 471)
+        Me.statusStrip.Location = New System.Drawing.Point(0, 507)
         Me.statusStrip.Name = "statusStrip"
-        Me.statusStrip.Size = New System.Drawing.Size(719, 30)
+        Me.statusStrip.Size = New System.Drawing.Size(851, 30)
         Me.statusStrip.TabIndex = 7
         '
         'txtProgressBar
@@ -307,29 +313,36 @@ Partial Class frmMain
         'FrameLevfiler
         '
         Me.FrameLevfiler.AccessibleRole = System.Windows.Forms.AccessibleRole.Grouping
-        Me.FrameLevfiler.Anchor = System.Windows.Forms.AnchorStyles.Left
+        Me.FrameLevfiler.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.FrameLevfiler.Controls.Add(Me.lstFiles)
         Me.FrameLevfiler.HeaderText = "Leverantörsfiler"
-        Me.FrameLevfiler.Location = New System.Drawing.Point(158, 200)
+        Me.FrameLevfiler.Location = New System.Drawing.Point(509, 19)
         Me.FrameLevfiler.Name = "FrameLevfiler"
-        Me.FrameLevfiler.Size = New System.Drawing.Size(489, 260)
+        Me.FrameLevfiler.Size = New System.Drawing.Size(286, 446)
         Me.FrameLevfiler.TabIndex = 0
         Me.FrameLevfiler.Text = "Leverantörsfiler"
         '
         'frameLev
         '
         Me.frameLev.AccessibleRole = System.Windows.Forms.AccessibleRole.Grouping
+        Me.frameLev.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.frameLev.Controls.Add(Me.lstLev)
         Me.frameLev.HeaderText = "Upplagda leverantörsmallar"
         Me.frameLev.Location = New System.Drawing.Point(158, 19)
         Me.frameLev.Name = "frameLev"
-        Me.frameLev.Size = New System.Drawing.Size(489, 173)
+        Me.frameLev.Size = New System.Drawing.Size(286, 446)
         Me.frameLev.TabIndex = 8
         Me.frameLev.Text = "Upplagda leverantörsmallar"
         '
         'frameCmd
         '
         Me.frameCmd.AccessibleRole = System.Windows.Forms.AccessibleRole.Grouping
+        Me.frameCmd.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.frameCmd.Controls.Add(Me.cmdTransfer)
         Me.frameCmd.Controls.Add(Me.chkVerifiering)
         Me.frameCmd.HeaderText = ""
@@ -376,7 +389,7 @@ Partial Class frmMain
         Me.MainMenu.Items.AddRange(New Telerik.WinControls.RadItem() {Me.mnuFile, Me.mnuSupplier, Me.mnuMainHelp})
         Me.MainMenu.Location = New System.Drawing.Point(0, 0)
         Me.MainMenu.Name = "MainMenu"
-        Me.MainMenu.Size = New System.Drawing.Size(719, 20)
+        Me.MainMenu.Size = New System.Drawing.Size(851, 20)
         Me.MainMenu.TabIndex = 0
         '
         'frmMain
@@ -384,7 +397,7 @@ Partial Class frmMain
         Me.AccessibleName = "frmMain"
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(719, 501)
+        Me.ClientSize = New System.Drawing.Size(851, 537)
         Me.Controls.Add(Me.frameCmd)
         Me.Controls.Add(Me.frameLev)
         Me.Controls.Add(Me.FrameLevfiler)

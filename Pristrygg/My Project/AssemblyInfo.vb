@@ -9,10 +9,10 @@ Imports System.Runtime.InteropServices
 ' Review the values of the assembly attributes
 
 <Assembly: AssemblyTitle("Pristrygg")>
-<Assembly: AssemblyDescription("")>
-<Assembly: AssemblyCompany("EVRY Corporate IT")>
+<Assembly: AssemblyDescription("Hjälper till med att överföra artikelinformation till Trygg/2000")>
+<Assembly: AssemblyCompany("Trygg2000")>
 <Assembly: AssemblyProduct("Pristrygg")>
-<Assembly: AssemblyCopyright("Copyright © EVRY Corporate IT 2020")>
+<Assembly: AssemblyCopyright("Copyright © Trygg/2000")>
 <Assembly: AssemblyTrademark("")>
 
 <Assembly: ComVisible(False)>
@@ -31,5 +31,5 @@ Imports System.Runtime.InteropServices
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")>
 
-<Assembly: AssemblyVersion("1.0.0.0")>
-<Assembly: AssemblyFileVersion("1.0.0.0")>
+<Assembly: AssemblyVersion("11.0.0.0")>
+<Assembly: AssemblyFileVersion("11.0.0.0")>
